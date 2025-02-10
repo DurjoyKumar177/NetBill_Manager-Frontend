@@ -14,6 +14,10 @@ import Broadband from "../Pages/Broadband";
 import Complain from "../Pages/Complain";
 import ContactUsPage from "../Pages/ContactUsPage";
 import Announcements from "../Pages/Announcements"
+import ForgetPassword from "../Pages/ForgetPassword";
+import ForgetPasswordSuccess from "../Pages/PasswordResetSuccess";
+import UpdateProfile from "../Pages/UpdateProfile";
+import ChangePassword from "../Pages/ChangePassword";
 
 
 const Routes = createBrowserRouter([
@@ -80,6 +84,24 @@ const Routes = createBrowserRouter([
       path: "/broadband",
       element: <Broadband />,
     },
+    {
+      path: "/forgot-password",
+      element: <ForgetPassword />,
+    },
+    {
+      path: "/password-reset-success",
+      element: <ForgetPasswordSuccess/>,
+    },
+    {
+      path: "/update_profile",
+      element: <UpdateProfile />,
+    },
+    {
+      path: "/change_password",
+      element: <ChangePassword />,
+    },
+
+
     ]
   }
 ]);

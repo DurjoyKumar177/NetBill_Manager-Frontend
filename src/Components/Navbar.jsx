@@ -113,7 +113,7 @@ const Navbar = () => {
                 <a href="/login" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
                   Login
                 </a>
-                <a href="/sign_up" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
+                <a href="/register" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
                   Register
                 </a>
               </div>
