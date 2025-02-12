@@ -61,7 +61,7 @@ const AboutUs = () => {
             <div className="stats shadow">
               <div className="stat">
                 <div className="stat-title">Satisfied Users</div>
-                <div className="stat-value">122000</div>
+                <div className="stat-value">1220</div>
                 <div className="stat-desc">30% more than last month</div>
               </div>
             </div>

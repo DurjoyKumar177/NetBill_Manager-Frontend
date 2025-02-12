@@ -72,17 +72,18 @@ const ContactUsPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold text-center text-blue-600 mb-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-100 to-white p-6">
+      <div className="w-4/5 md:w-3/5 lg:w-2/5 bg-white/80 backdrop-blur-lg shadow-2xl rounded-2xl p-10 border border-gray-300 transition-all duration-300 hover:shadow-3xl">
+        
+        {/* Title */}
+        <h2 className="text-3xl font-extrabold text-center text-indigo-700 mb-6">
           Contact Us
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name Input */}
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="name" className="block text-sm font-medium text-gray-800">
               Name
             </label>
             <input
@@ -92,19 +93,16 @@ const ContactUsPage = () => {
               value={formData.name}
               onChange={handleChange}
               required
-              className={`mt-1 block w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                formErrors.name ? "border-red-500" : ""
+              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${
+                formErrors.name ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {formErrors.name && (
-              <p className="text-red-500 text-xs italic">{formErrors.name}</p>
-            )}
+            {formErrors.name && <p className="text-red-500 text-xs italic">{formErrors.name}</p>}
           </div>
+
+          {/* Email Input */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-800">
               Email
             </label>
             <input
@@ -114,19 +112,16 @@ const ContactUsPage = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className={`mt-1 block w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                formErrors.email ? "border-red-500" : ""
+              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${
+                formErrors.email ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {formErrors.email && (
-              <p className="text-red-500 text-xs italic">{formErrors.email}</p>
-            )}
+            {formErrors.email && <p className="text-red-500 text-xs italic">{formErrors.email}</p>}
           </div>
+
+          {/* Subject Input */}
           <div>
-            <label
-              htmlFor="subject"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="subject" className="block text-sm font-medium text-gray-800">
               Subject
             </label>
             <input
@@ -136,21 +131,16 @@ const ContactUsPage = () => {
               value={formData.subject}
               onChange={handleChange}
               required
-              className={`mt-1 block w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                formErrors.subject ? "border-red-500" : ""
+              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${
+                formErrors.subject ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {formErrors.subject && (
-              <p className="text-red-500 text-xs italic">
-                {formErrors.subject}
-              </p>
-            )}
+            {formErrors.subject && <p className="text-red-500 text-xs italic">{formErrors.subject}</p>}
           </div>
+
+          {/* Message Input */}
           <div>
-            <label
-              htmlFor="message"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="message" className="block text-sm font-medium text-gray-800">
               Message
             </label>
             <textarea
@@ -160,34 +150,33 @@ const ContactUsPage = () => {
               onChange={handleChange}
               required
               rows="4"
-              className={`mt-1 block w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                formErrors.message ? "border-red-500" : ""
+              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${
+                formErrors.message ? "border-red-500" : "border-gray-300"
               }`}
             ></textarea>
-            {formErrors.message && (
-              <p className="text-red-500 text-xs italic">
-                {formErrors.message}
-              </p>
-            )}
+            {formErrors.message && <p className="text-red-500 text-xs italic">{formErrors.message}</p>}
           </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-white hover:text-indigo-600 hover:border-indigo-600 border-2 shadow-md"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Sending..." : "Send Message"}
           </button>
         </form>
 
+        {/* Submission Messages */}
         {submissionStatus === "success" && (
-          <div className="mt-4 text-green-500 text-center">
-            Message sent successfully!
+          <div className="mt-4 text-green-500 text-center font-medium">
+            ✅ Message sent successfully!
           </div>
         )}
 
         {submissionStatus === "error" && (
-          <div className="mt-4 text-red-500 text-center">
-            An error occurred while sending the message. Please try again.
+          <div className="mt-4 text-red-500 text-center font-medium">
+            ❌ An error occurred while sending the message. Please try again.
           </div>
         )}
       </div>

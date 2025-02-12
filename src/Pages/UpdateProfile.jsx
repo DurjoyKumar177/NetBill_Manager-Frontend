@@ -95,18 +95,48 @@ const UpdateProfile = () => {
     e.preventDefault();
     setSuccess(null);
     setError(null);
-
+  
     const formData = new FormData();
+  
+    // Append regular fields
     Object.keys(profile).forEach((key) => {
-      if (typeof profile[key] === "object" && profile[key] !== null) {
-        Object.keys(profile[key]).forEach((nestedKey) => {
-          formData.append(`${key}.${nestedKey}`, profile[key][nestedKey]);
-        });
-      } else {
+      if (typeof profile[key] !== "object" || profile[key] === null) {
         formData.append(key, profile[key]);
       }
     });
-
+  
+    // Append nested fields in additional_info
+    Object.keys(profile.additional_info).forEach((nestedKey) => {
+      const nestedValue = profile.additional_info[nestedKey];
+      if (nestedKey === "devices") {
+        // Handle devices as a single string (comma-separated values)
+        formData.append(`additional_info[${nestedKey}]`, nestedValue.join(","));
+      } else {
+        formData.append(`additional_info[${nestedKey}]`, nestedValue);
+      }
+    });
+  
+    // Append nested fields in package_info
+    Object.keys(profile.package_info).forEach((nestedKey) => {
+      const nestedValue = profile.package_info[nestedKey];
+      if (nestedKey === "package_slip" && nestedValue) {
+        // Append file only if it exists
+        formData.append(`package_info[${nestedKey}]`, nestedValue);
+      } else if (nestedKey !== "package_slip") {
+        formData.append(`package_info[${nestedKey}]`, nestedValue);
+      }
+    });
+  
+    // Conditionally append profile_pic if it exists and is not a string (file input)
+    if (profile.profile_pic && profile.profile_pic instanceof File) {
+      formData.append("profile_pic", profile.profile_pic);
+    }
+  
+    // Log the FormData to the console for debugging
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+  
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/accounts/profile/update/", {
@@ -116,17 +146,20 @@ const UpdateProfile = () => {
         },
         body: formData,
       });
-
+  
       if (response.ok) {
         setSuccess("Profile updated successfully!");
       } else {
-        setError("Failed to update profile.");
+        const responseData = await response.json();
+        setError(`Failed to update profile: ${JSON.stringify(responseData)}`);
       }
     } catch (error) {
       setError("An error occurred while updating profile.");
     }
   };
-
+  
+  
+    
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-600 text-lg">
@@ -207,11 +240,14 @@ const UpdateProfile = () => {
               <input type="text" name="router_model" value={profile.additional_info.router_model} onChange={(e) => handleNestedChange(e, "additional_info")} className="input-field" />
             </div>
 
+
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Devices</label>
               <input type="text" name="devices" value={profile.additional_info.devices} onChange={(e) => handleNestedChange(e, "additional_info")} className="input-field" />
             </div>
           </div>
+
+          
 
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-4">Package Info</h3>
 

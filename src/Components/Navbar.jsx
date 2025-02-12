@@ -1,23 +1,32 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import profilePlaceholder from "../assets/profile_placeholder.jpg";
-import netBillLogo from "../assets/NetBill.png"; 
+import netBillLogo from "../assets/NetBill.png";
 
 const Navbar = () => {
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [isNotificationOpen, setNotificationOpen] = useState(false);
   const [isAuthenticated, setAuthenticated] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
+  const [userType, setUserType] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation(); // Get current location
 
+  // Fetch user data on mount and when authentication state changes
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token && token !== "null") {
       setAuthenticated(true);
       fetchUserProfile();
+      fetchUserType();
+    } else {
+      setAuthenticated(false);
+      setUserType(null);
+      setProfilePic(null);
     }
-  }, []);
+  }, [isAuthenticated]); // Re-run when isAuthenticated changes
 
+  // Fetch user profile
   const fetchUserProfile = async () => {
     try {
       const response = await fetch("http://127.0.0.1:8000/api/accounts/profile/update/", {
@@ -37,16 +46,56 @@ const Navbar = () => {
     }
   };
 
+  // Fetch user type
+  const fetchUserType = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/accounts/user-type/", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserType(data.user_type);
+      }
+    } catch (error) {
+      console.error("Error fetching user type:", error);
+    }
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isProfileOpen && !event.target.closest(".profile-dropdown")) {
+        setProfileOpen(false);
+      }
+      if (isNotificationOpen && !event.target.closest(".notification-dropdown")) {
+        setNotificationOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isProfileOpen, isNotificationOpen]);
+
+  // Toggle profile menu
   const toggleProfileMenu = () => {
     setProfileOpen(!isProfileOpen);
     setNotificationOpen(false);
   };
 
+  // Toggle notification menu
   const toggleNotification = () => {
     setNotificationOpen(!isNotificationOpen);
     setProfileOpen(false);
   };
 
+  // Logout user
   const logoutUser = async () => {
     try {
       await fetch("http://127.0.0.1:8000/api/accounts/auth/logout/", {
@@ -62,7 +111,12 @@ const Navbar = () => {
 
     localStorage.removeItem("token");
     setAuthenticated(false);
-    window.location.href = "/";
+    navigate("/");
+  };
+
+  // Helper function to determine if a link is active
+  const isActive = (path) => {
+    return location.pathname === path;
   };
 
   return (
@@ -79,29 +133,83 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="flex space-x-4">
-            <a href="/Home" className="rounded-md bg-blue-500 px-3 py-2 text-sm font-medium text-white">
+            <a
+              href="/Home"
+              className={`rounded-md px-3 py-2 text-sm font-medium ${
+                isActive("/Home") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+              }`}
+            >
               Home
             </a>
-            <a href="/announcements" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
+            <a
+              href="/announcements"
+              className={`rounded-md px-3 py-2 text-sm font-medium ${
+                isActive("/announcements") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+              }`}
+            >
               Announcements
             </a>
-            {isAuthenticated && (
+            {isAuthenticated && userType === "staff" ? (
               <>
-                <a href="/complains" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
+                <a
+                  href="/complains"
+                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                    isActive("/complains") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                  }`}
+                >
+                  User Complains
+                </a>
+                <a
+                  href="/payments"
+                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                    isActive("/payments") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                  }`}
+                >
+                  Collections
+                </a>
+              </>
+            ) : isAuthenticated && userType === "user" ? (
+              <>
+                <a
+                  href="/complains"
+                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                    isActive("/complains") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                  }`}
+                >
                   My Complains
                 </a>
-                <a href="/payments" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
+                <a
+                  href="/payments"
+                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                    isActive("/payments") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                  }`}
+                >
                   Payments
                 </a>
-                <a href="/broadband" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
+                <a
+                  href="/broadband"
+                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                    isActive("/broadband") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                  }`}
+                >
                   My Broadband
                 </a>
               </>
-            )}
-            <a href="/contact" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
+            ) : null}
+            <a
+              href="/contact"
+              className={`rounded-md px-3 py-2 text-sm font-medium ${
+                isActive("/contact") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+              }`}
+            >
               Contact Us
             </a>
-            <a href="/tutorials" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
+            <a
+              href="/tutorials"
+              className={`rounded-md px-3 py-2 text-sm font-medium ${
+                isActive("/tutorials") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+              }`}
+            >
               Tutorials
             </a>
           </div>
@@ -110,10 +218,20 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             {!isAuthenticated ? (
               <div className="flex items-center space-x-4">
-                <a href="/login" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
+                <a
+                  href="/login"
+                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                    isActive("/login") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                  }`}
+                >
                   Login
                 </a>
-                <a href="/register" className="rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 hover:text-gray-100">
+                <a
+                  href="/register"
+                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                    isActive("/register") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                  }`}
+                >
                   Register
                 </a>
               </div>
@@ -126,7 +244,7 @@ const Navbar = () => {
                   </svg>
                 </button>
                 {isNotificationOpen && (
-                  <div className="absolute right-0 z-10 mt-2 w-64 rounded-md bg-white py-2 px-4 shadow-lg">
+                  <div className="notification-dropdown absolute right-0 z-10 mt-2 w-64 rounded-md bg-white py-2 px-4 shadow-lg">
                     <p className="text-sm text-gray-700">Notification feature is coming soon.</p>
                   </div>
                 )}
@@ -135,7 +253,7 @@ const Navbar = () => {
 
             {/* Profile Dropdown */}
             {isAuthenticated && (
-              <div className="relative ml-3">
+              <div className="relative ml-3 profile-dropdown">
                 <button onClick={toggleProfileMenu} className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none hover:ring-2 hover:ring-gray-500">
                   <img className="h-8 w-8 rounded-full" 
                     src={profilePic ? profilePic : profilePlaceholder} 
@@ -145,7 +263,11 @@ const Navbar = () => {
                 {isProfileOpen && (
                   <div className="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg">
                     <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
-                    <a href="/History" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">History</a>
+                    {userType === "staff" ? (
+                      <a href="/History" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Collections</a>
+                    ) : (
+                      <a href="/History" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">History</a>
+                    )}
                     <button onClick={logoutUser} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
                   </div>
                 )}

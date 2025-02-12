@@ -1,98 +1,48 @@
-import React, { useState, useEffect } from 'react';
-
 const Broadband = () => {
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const token = localStorage.getItem('token'); // Get token from local storage
-
-        if (!token) {
-          throw new Error('Authentication token not found. Please log in.');
-        }
-
-        const response = await fetch(
-          'YOUR_API_ENDPOINT_FOR_CUSTOMERS', // Replace with your actual API endpoint
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Token ${token}`, // Include authorization header
-            },
-          }
-        );
-
-        if (!response.ok) {
-          let errorMessage = `HTTP error! Status: ${response.status}`;
-          try {
-            const errorData = await response.json();
-            if (errorData && errorData.message) {
-              errorMessage = errorData.message;
-            }
-          } catch (jsonError) {
-            console.error('Error parsing JSON error:', jsonError);
-          }
-          throw new Error(errorMessage);
-        }
-
-        const data = await response.json();
-        setCustomers(data);
-      } catch (error) {
-        setError(error.message);
-        console.error('Error fetching customers:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCustomers();
-  }, []);
-
-  if (loading) {
-    return <div>Loading customer data...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading customer data: {error}</div>;
-  }
-
-  if (customers.length === 0) {
-    return <div>No customers found.</div>;
-  }
+  const packageDetails = {
+    name: "Package-1",
+    price: 599,
+    yearlyPrice: 5450,
+    description: "Perfect for getting started",
+    features: [
+      "✅ Speed: Up to 10 Mbps",
+      "✅ Data Limit: Unlimited (Fair Usage Policy Applies)",
+      "✅ Support: Standard Customer Support (9 AM - 9 PM)",
+      "✅ IP Type: Real IP",
+      "✅ IPv6 Available",
+      "✅ 1-8 contention ratio",
+    ],
+  };
 
   return (
-    <div>
-      <h2>Broadband Customers</h2>
-      <table className="table-auto"> {/* Tailwind CSS class for a basic table */}
-        <thead>
-          <tr>
-            <th className="px-4 py-2">Customer ID</th>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Email</th>
-            <th className="px-4 py-2">Broadband Plan</th>
-            <th className="px-4 py-2">Installation Date</th>
-            {/* Add more columns as needed */}
-          </tr>
-        </thead>
-        <tbody>
-          {customers.map((customer) => (
-            <tr key={customer.customer_id}> {/* Changed to customer_id */}
-              <td className="border px-4 py-2">{customer.customer_id}</td>{/* Changed to customer_id */}
-              <td className="border px-4 py-2">{customer.first_name} {customer.last_name}</td>{/* Changed to first_name and last_name */}
-              <td className="border px-4 py-2">{customer.email_address}</td>{/* Changed to email_address */}
-              <td className="border px-4 py-2">{customer.plan_name}</td>{/* Changed to plan_name */}
-              <td className="border px-4 py-2">{customer.installation_date}</td>{/* Changed to installation_date */}
-              {/* Add more data cells as needed */}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-100 to-white p-6">
+      <div className="max-w-lg w-full bg-white shadow-2xl rounded-2xl p-8 border border-gray-200 transition duration-300 hover:shadow-3xl hover:scale-105">
+        
+        {/* Package Name */}
+        <h2 className="text-3xl font-bold text-gray-800 text-center">{packageDetails.name}</h2>
+        <p className="text-gray-500 text-center mt-2">{packageDetails.description}</p>
+
+        {/* Pricing */}
+        <div className="mt-6 text-center">
+          <span className="text-4xl font-bold text-blue-600 transition group-hover:text-white">
+            ৳{packageDetails.price}
+          </span>
+          <span className="text-gray-500 text-lg"> / month</span>
+          <p className="text-gray-600 mt-1">or ৳{packageDetails.yearlyPrice} / year</p>
+        </div>
+
+        {/* Features */}
+        <div className="bg-gray-50 rounded-lg shadow-md p-6 mt-6 transition duration-300 hover:bg-blue-600 hover:text-white">
+          <h4 className="text-lg font-semibold text-gray-800 transition hover:text-white">Features:</h4>
+          <ul className="mt-3 space-y-2 text-gray-600 transition hover:text-white">
+            {packageDetails.features.map((feature, index) => (
+              <li key={index}>{feature}</li>
+            ))}
+          </ul>
+        </div>
+
+
+      </div>
     </div>
   );
 };

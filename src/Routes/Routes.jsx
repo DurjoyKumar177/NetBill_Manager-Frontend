@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 import Home from "../Pages/Home";
 import MainLayout from "../Layout/MainLayout";
-import Login from "../Pages/login";
+import Login from "../Pages/Login";
 import Profile from "../Pages/Profile";
 import History from "../Pages/History";
 import AnnouncementForm from "../Pages/AnnouncementForm";
@@ -18,6 +18,7 @@ import ForgetPassword from "../Pages/ForgetPassword";
 import ForgetPasswordSuccess from "../Pages/PasswordResetSuccess";
 import UpdateProfile from "../Pages/UpdateProfile";
 import ChangePassword from "../Pages/ChangePassword";
+import MakePayments from "../Pages/MakePayments";
 
 
 const Routes = createBrowserRouter([
@@ -79,6 +80,10 @@ const Routes = createBrowserRouter([
     {
       path: "/payments",
       element: <Payments />,
+    },
+    {
+      path: "/make-payment",
+      element: <MakePayments />,
     },
     {
       path: "/broadband",
