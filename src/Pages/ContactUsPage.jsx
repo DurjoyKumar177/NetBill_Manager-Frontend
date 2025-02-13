@@ -4,11 +4,12 @@ const ContactUsPage = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
     message: "",
   });
   const [formErrors, setFormErrors] = useState({});
-  const [submissionStatus, setSubmissionStatus] = useState(null); // 'success' | 'error' | null
+  const [submissionStatus, setSubmissionStatus] = useState(null); 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = () => {
@@ -19,6 +20,7 @@ const ContactUsPage = () => {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = "Invalid email format";
     }
+    if (!formData.phone) errors.phone = "Phone number is required";
     if (!formData.subject) errors.subject = "Subject is required";
     if (!formData.message) errors.message = "Message is required";
     setFormErrors(errors);
@@ -28,7 +30,6 @@ const ContactUsPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    // Clear error message for the field being changed
     setFormErrors({ ...formErrors, [name]: "" });
   };
 
@@ -40,10 +41,10 @@ const ContactUsPage = () => {
     }
 
     setIsSubmitting(true);
-    setSubmissionStatus(null); // Reset status
+    setSubmissionStatus(null); 
     try {
       const response = await fetch(
-        "YOUR_API_ENDPOINT", // Replace with your actual API endpoint
+        "http://127.0.0.1:8000/api/contact/", 
         {
           method: "POST",
           headers: {
@@ -60,8 +61,8 @@ const ContactUsPage = () => {
       const data = await response.json();
       console.log("Success:", data);
       setSubmissionStatus("success");
-      setFormData({ name: "", email: "", subject: "", message: "" }); // Clear form
-      setFormErrors({});//clear errors
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" }); 
+      setFormErrors({}); 
 
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -74,7 +75,17 @@ const ContactUsPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-100 to-white p-6">
       <div className="w-4/5 md:w-3/5 lg:w-2/5 bg-white/80 backdrop-blur-lg shadow-2xl rounded-2xl p-10 border border-gray-300 transition-all duration-300 hover:shadow-3xl">
-        
+
+        {/* Display success message at the top */}
+        {submissionStatus === "success" && (
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-green-500 text-white py-3 px-6 rounded-md shadow-md text-lg font-semibold">
+            ✅ Message sent successfully! <br /> Thanks for contacting us. We will contact you as soon as possible.
+          </div>
+        )}
+
+        {/* Remove the success message after 3 seconds */}
+        {submissionStatus === "success" && setTimeout(() => setSubmissionStatus(null), 3000)}
+
         {/* Title */}
         <h2 className="text-3xl font-extrabold text-center text-indigo-700 mb-6">
           Contact Us
@@ -93,9 +104,7 @@ const ContactUsPage = () => {
               value={formData.name}
               onChange={handleChange}
               required
-              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${
-                formErrors.name ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${formErrors.name ? "border-red-500" : "border-gray-300"}`}
             />
             {formErrors.name && <p className="text-red-500 text-xs italic">{formErrors.name}</p>}
           </div>
@@ -112,11 +121,26 @@ const ContactUsPage = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${
-                formErrors.email ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${formErrors.email ? "border-red-500" : "border-gray-300"}`}
             />
             {formErrors.email && <p className="text-red-500 text-xs italic">{formErrors.email}</p>}
+          </div>
+
+          {/* Phone Input */}
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-800">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${formErrors.phone ? "border-red-500" : "border-gray-300"}`}
+            />
+            {formErrors.phone && <p className="text-red-500 text-xs italic">{formErrors.phone}</p>}
           </div>
 
           {/* Subject Input */}
@@ -131,9 +155,7 @@ const ContactUsPage = () => {
               value={formData.subject}
               onChange={handleChange}
               required
-              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${
-                formErrors.subject ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${formErrors.subject ? "border-red-500" : "border-gray-300"}`}
             />
             {formErrors.subject && <p className="text-red-500 text-xs italic">{formErrors.subject}</p>}
           </div>
@@ -150,9 +172,7 @@ const ContactUsPage = () => {
               onChange={handleChange}
               required
               rows="4"
-              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${
-                formErrors.message ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${formErrors.message ? "border-red-500" : "border-gray-300"}`}
             ></textarea>
             {formErrors.message && <p className="text-red-500 text-xs italic">{formErrors.message}</p>}
           </div>
@@ -168,12 +188,6 @@ const ContactUsPage = () => {
         </form>
 
         {/* Submission Messages */}
-        {submissionStatus === "success" && (
-          <div className="mt-4 text-green-500 text-center font-medium">
-            ✅ Message sent successfully!
-          </div>
-        )}
-
         {submissionStatus === "error" && (
           <div className="mt-4 text-red-500 text-center font-medium">
             ❌ An error occurred while sending the message. Please try again.

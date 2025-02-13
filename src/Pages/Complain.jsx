@@ -1,290 +1,132 @@
-import React, { useState } from 'react';
-import {
-    FaThumbsUp,
-    FaRegComment,
-    FaHeart,
-    FaLaugh,
-    FaSurprise,
-    FaSadTear,
-    FaAngry,
-} from 'react-icons/fa';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const REACTIONS = [
-    { icon: <FaThumbsUp className="text-blue-500" />, label: 'Like' },
-    { icon: <FaHeart className="text-red-500" />, label: 'Love' },
-    { icon: <FaLaugh className="text-yellow-500" />, label: 'Haha' },
-    { icon: <FaSurprise className="text-orange-500" />, label: 'Wow' },
-    { icon: <FaSadTear className="text-blue-400" />, label: 'Sad' },
-    { icon: <FaAngry className="text-red-600" />, label: 'Angry' },
-];
+const Complaints = () => {
+  const [userType, setUserType] = useState(null);
+  const [complaints, setComplaints] = useState([]);
+  const [replies, setReplies] = useState({});
+  const [replyMessage, setReplyMessage] = useState("");
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [expandedReplies, setExpandedReplies] = useState({});
+  const navigate = useNavigate();
 
-const Complain = () => {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        subject: '',
-        details: '',
-    });
-    const [message, setMessage] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
-    const [reactions, setReactions] = useState({});
-    const [showReactions, setShowReactions] = useState(null);
-    const [comments, setComments] = useState({});
-    const [newComments, setNewComments] = useState({});
-    const [formErrors, setFormErrors] = useState({});
+  const token = localStorage.getItem("token");
+  const headers = { Authorization: `Token ${token}` };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
+  useEffect(() => {
+    axios.get("http://127.0.0.1:8000/api/accounts/user-type/", { headers })
+      .then(res => setUserType(res.data.user_type))
+      .catch(err => console.error("Error fetching user type", err));
 
-        // Clear any previous error for this field
-        setFormErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
-    };
+    axios.get("http://127.0.0.1:8000/api/complains/", { headers })
+      .then(res => setComplaints(res.data.reverse()))
+      .catch(err => console.error("Error fetching complaints", err));
+  }, []);
 
-    const validateForm = () => {
-        let errors = {};
-        if (!formData.name) errors.name = 'Name is required';
-        if (!formData.email) {
-            errors.email = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            errors.email = 'Invalid email format';
-        }
-        if (!formData.subject) errors.subject = 'Subject is required';
-        if (!formData.details) errors.details = 'Details are required';
-        setFormErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
+  const fetchReplies = (complainId) => {
+    if (expandedReplies[complainId]) {
+      setExpandedReplies(prev => ({ ...prev, [complainId]: false }));
+    } else {
+      axios.get(`http://127.0.0.1:8000/api/complains/${complainId}/replies/`, { headers })
+        .then(res => {
+          setReplies(prev => ({ ...prev, [complainId]: res.data }));
+          setExpandedReplies(prev => ({ ...prev, [complainId]: true }));
+        })
+        .catch(err => console.error("Error fetching replies", err));
+    }
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  const handleReplySubmit = (complainId) => {
+    axios.post(`http://127.0.0.1:8000/api/complains/${complainId}/reply/`, {
+      complain: complainId,
+      message: replyMessage,
+    }, { headers })
+      .then(() => {
+        setReplyMessage("");
+        fetchReplies(complainId);
+      })
+      .catch(err => console.error("Error submitting reply", err));
+  };
 
-        if (!validateForm()) {
-            return;
-        }
-
-        setMessage('');
-        setIsSubmitting(true); // Disable the button
-
-        try {
-            const response = await fetch('http://127.0.0.1:8000/api/complains/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            if (!response.ok) {
-                let errorMessage = 'Failed to submit complaint. Please try again.';
-                try {
-                    const errorData = await response.json();
-                    if (errorData && errorData.message) {
-                        errorMessage = errorData.message; // Use backend error message
-                    }
-                } catch (parseError) {
-                    console.error("Error parsing error response:", parseError);
-                }
-                throw new Error(errorMessage);
-            }
-
-            const result = await response.json();
-            setMessage('Complaint submitted successfully!');
-            setFormData({
-                name: '',
-                email: '',
-                subject: '',
-                details: '',
-            });
-            setFormErrors({}); // Clear any previous errors
-        } catch (error) {
-            setMessage(error.message || 'Failed to submit complaint. Please try again.');
-            console.error('Error:', error);
-        } finally {
-            setIsSubmitting(false); // Enable the button
-        }
-    };
-
-    const handleReaction = (postId, reaction) => {
-        setReactions(prevReactions => ({
-            ...prevReactions,
-            [postId]: reaction,
-        }));
-        setShowReactions(null);
-    };
-
-    const handleToggleComments = (postId) => {
-        setComments(prevComments => ({
-            ...prevComments,
-            [postId]: !prevComments[postId],
-        }));
-    };
-
-    const handleCommentChange = (postId, text) => {
-        setNewComments(prevNewComments => ({
-            ...prevNewComments,
-            [postId]: text,
-        }));
-    };
-
-    const handleAddComment = (postId) => {
-        if (!newComments[postId]) return;
-
-        setComments(prevComments => ({
-            ...prevComments,
-            [postId]: [...(prevComments[postId] || []), newComments[postId]],
-        }));
-        setNewComments(prevNewComments => ({ ...prevNewComments, [postId]: '' }));
-    };
-
-    return (
-        <div className="max-w-2xl mx-auto mt-4">
-            <div className="bg-white shadow-md rounded-lg p-4 mb-4">
-                <h1 className="text-lg font-semibold mb-4">Submit a Complaint</h1>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                            Name
-                        </label>
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            className={`mt-1 block w-full border ${formErrors.name ? 'border-red-500' : 'border-gray-300'} rounded-md p-2`}
-                            required
-                        />
-                        {formErrors.name && <p className="text-red-500 text-xs italic">{formErrors.name}</p>}
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            className={`mt-1 block w-full border ${formErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-md p-2`}
-                            required
-                        />
-                        {formErrors.email && <p className="text-red-500 text-xs italic">{formErrors.email}</p>}
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
-                            Subject
-                        </label>
-                        <input
-                            type="text"
-                            id="subject"
-                            name="subject"
-                            value={formData.subject}
-                            onChange={handleChange}
-                            className={`mt-1 block w-full border ${formErrors.subject ? 'border-red-500' : 'border-gray-300'} rounded-md p-2`}
-                            required
-                        />
-                        {formErrors.subject && <p className="text-red-500 text-xs italic">{formErrors.subject}</p>}
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="details" className="block text-sm font-medium text-gray-700">
-                            Complaint Details
-                        </label>
-                        <textarea
-                            id="details"
-                            name="details"
-                            value={formData.details}
-                            onChange={handleChange}
-                            className={`mt-1 block w-full border ${formErrors.details ? 'border-red-500' : 'border-gray-300'} rounded-md p-2 h-32`} // Increased height
-                            required
-                        />
-                        {formErrors.details && <p className="text-red-500 text-xs italic">{formErrors.details}</p>}
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50"
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
-                    </button>
-                </form>
-                {message && <p className="mt-4 text-center text-green-500">{message}</p>}
+  return (
+    <div className="flex justify-center p-4">
+      <div className="w-4/5 md:w-3/5 lg:w-2/3 bg-gray-50 p-6 rounded-lg shadow-lg">
+        <div>
+          {userType === "user" && (
+            <div className="text-center mb-4">
+              <button 
+                className="btn bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-lg shadow-md transition-transform duration-300 transform hover:scale-105 hover:from-purple-600 hover:to-blue-500" 
+                onClick={() => navigate("/create-complain")}
+              >
+                Create Complaint
+              </button>
             </div>
-
-            {/* Example of Reactions and Comments Section */}
-            <div className="bg-white shadow-md rounded-lg p-4 mb-4">
-                <div className="flex justify-between items-center mt-3 border-t pt-2 text-gray-600 text-sm">
-                    <div className="relative">
-                        <button
-                            className="flex items-center space-x-1 hover:text-blue-500"
-                            onClick={() => setShowReactions('examplePostId')}
-                        >
-                            {reactions['examplePostId'] ? (
-                                reactions['examplePostId'].icon
-                            ) : (
-                                <FaThumbsUp />
-                            )}
-                            <span>
-                                {reactions['examplePostId']
-                                    ? reactions['examplePostId'].label
-                                    : 'Like'}
-                            </span>
-                        </button>
-                        {showReactions === 'examplePostId' && (
-                            <div className="absolute -top-10 left-0 flex space-x-2 bg-white shadow-md p-2 rounded-lg">
-                                {REACTIONS.map((r, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => handleReaction('examplePostId', r)}
-                                        aria-label={`React with ${r.label}`}
-                                    >
-                                        {r.icon}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    <button
-                        className="flex items-center space-x-1 hover:text-blue-500"
-                        onClick={() => handleToggleComments('examplePostId')}
-                    >
-                        <FaRegComment />
-                        <span>Comment</span>
-                    </button>
-                </div>
-
-                {comments['examplePostId'] && (
-                    <div className="mt-3">
-                        {comments['examplePostId'].map((comment, index) => (
-                            <p key={index} className="text-sm text-gray-600 border-b pb-1">
-                                {comment}
-                            </p>
-                        ))}
-                        <div className="flex mt-2">
-                            <input
-                                type="text"
-                                value={newComments['examplePostId'] || ''}
-                                onChange={(e) =>
-                                    handleCommentChange('examplePostId', e.target.value)
-                                }
-                                placeholder="Write a comment..."
-                                className="border rounded-md p-1 flex-1"
-                            />
-                            <button
-                                onClick={() => handleAddComment('examplePostId')}
-                                className="ml-2 px-3 py-1 bg-blue-500 text-white rounded-md"
-                            >
-                                Post
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
+          )}
         </div>
-    );
+        <h2 className="text-2xl font-bold mb-4 text-blue-600 ">My Complaints</h2>
+        {complaints.length === 0 ? <p className="text-center">No complaints found.</p> : complaints.map(complain => (
+          <div 
+            key={complain.id} 
+            className="border border-gray-300 p-4 rounded bg-white shadow-lg hover:shadow-xl transition-shadow mb-4"
+          >
+            <div className="flex">
+              <div className="w-1/2">
+                <h3 className="text-xl font-semibold text-gray-800">{complain.title}</h3>
+                <p className="text-gray-600 mb-2">{complain.body}</p>
+              </div>
+            </div>
+            {complain.attachments.length > 0 && (
+              <div className="mt-2 flex justify-center">
+                {complain.attachments.map((attachment) => (
+                  attachment.file.endsWith(".mp4") ? (
+                    <video key={attachment.id} className="w-full max-w-3xl rounded" controls>
+                      <source src={attachment.file} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <img 
+                      key={attachment.id} 
+                      src={attachment.file} 
+                      alt="attachment" 
+                      className="w-full max-w-3xl h-80 rounded object-cover cursor-pointer" 
+                      onClick={() => window.open(attachment.file, "_blank")}
+                    />
+                  )
+                ))}
+              </div>
+            )}
+            <div className="flex justify-center mt-2">
+              <button 
+                className="btn btn-outline btn-sm text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white transition" 
+                onClick={() => fetchReplies(complain.id)}
+              >
+                {expandedReplies[complain.id] ? "Hide Replies" : "Show Replies"}
+              </button>
+              {userType === "staff" && (
+                <button 
+                  className="btn btn-primary btn-sm ml-2" 
+                  onClick={() => setSelectedComplaint(selectedComplaint === complain.id ? null : complain.id)}
+                >
+                  {selectedComplaint === complain.id ? "Cancel" : "Reply"}
+                </button>
+              )}
+            </div>
+            {expandedReplies[complain.id] && replies[complain.id] && (
+              <div className="mt-2 border-t pt-2">
+                {replies[complain.id].length === 0 ? <p className="text-gray-500 text-center">No replies yet.</p> : replies[complain.id].map(reply => (
+                  <div key={reply.id} className="border p-2 rounded mt-2 bg-gray-100">
+                    <p className="text-gray-700">{reply.message}</p>
+                    <span className="text-sm text-gray-500">{new Date(reply.created_at).toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
-export default Complain;
+export default Complaints;

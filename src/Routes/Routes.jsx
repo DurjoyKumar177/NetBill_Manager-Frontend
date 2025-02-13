@@ -19,6 +19,10 @@ import ForgetPasswordSuccess from "../Pages/PasswordResetSuccess";
 import UpdateProfile from "../Pages/UpdateProfile";
 import ChangePassword from "../Pages/ChangePassword";
 import MakePayments from "../Pages/MakePayments";
+import CreateComplain from "../Pages/CreateComplain";
+import PaymentSuccess from "../Pages/PaymentSuccess";
+import PaymentFailed from "../Pages/PaymentFailed";
+import PaymentCancel from "../Pages/PaymentCalcel";
 
 
 const Routes = createBrowserRouter([
@@ -62,6 +66,10 @@ const Routes = createBrowserRouter([
       element: <Complain></Complain>,
     },
     {
+      path: "/create-complain",
+      element: <CreateComplain />
+    },
+    {
       path: "/contact",
       element: <ContactUsPage></ContactUsPage>,
     },
@@ -84,6 +92,18 @@ const Routes = createBrowserRouter([
     {
       path: "/make-payment",
       element: <MakePayments />,
+    },
+    {
+      path: "/payment-success",
+      element: <PaymentSuccess />,
+    },
+    {
+      path: "/payment-failed",
+      element: <PaymentFailed />,
+    },
+    {
+      path: "/payment-cancel",
+      element: <PaymentCancel />,
     },
     {
       path: "/broadband",
