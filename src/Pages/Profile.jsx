@@ -75,19 +75,19 @@ const Profile = () => {
 
           <div className="bg-gray-100 p-4 rounded-lg shadow-md hover:shadow-lg transition">
             <h3 className="font-semibold text-lg">🏠 Address Details</h3>
-            <p><span className="font-medium">Local Area:</span> {profile.additional_info.local_area}</p>
-            <p><span className="font-medium">Road No:</span> {profile.additional_info.road_number}</p>
-            <p><span className="font-medium">Building:</span> {profile.additional_info.building_name}</p>
-            <p><span className="font-medium">Room No:</span> {profile.additional_info.room_no}</p>
+            <p><span className="font-medium">Local Area:</span> {profile.additional_info?.local_area}</p>
+            <p><span className="font-medium">Road No:</span> {profile.additional_info?.road_number}</p>
+            <p><span className="font-medium">Building:</span> {profile.additional_info?.building_name}</p>
+            <p><span className="font-medium">Room No:</span> {profile.additional_info?.room_no}</p>
           </div>
         </div>
 
         <div className="mt-6 bg-gray-100 p-4 rounded-lg shadow-md hover:shadow-lg transition">
           <h3 className="font-semibold text-lg">📶 Internet Package Details</h3>
-          <p><span className="font-medium">ISP Username:</span> {profile.package_info.isp_username}</p>
-          <p><span className="font-medium">Customer ID:</span> {profile.package_info.customer_id}</p>
-          <p><span className="font-medium">Package No:</span> {profile.package_info.package_number}</p>
-          <p><span className="font-medium">Monthly Payment:</span> ${profile.package_info.monthly_payment}</p>
+          <p><span className="font-medium">ISP Username:</span> {profile.package_info?.isp_username}</p>
+          <p><span className="font-medium">Customer ID:</span> {profile.package_info?.customer_id}</p>
+          <p><span className="font-medium">Package No:</span> {profile.package_info?.package_number}</p>
+          <p><span className="font-medium">Monthly Payment:</span> ${profile.package_info?.monthly_payment}</p>
         </div>
 
         <div className="mt-6 flex flex-col md:flex-row gap-4">
