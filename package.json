@@ -1,5 +1,4 @@
 {
-  "homepage": "https://github.com/DurjoyKumar177/NetBill_Manager-Frontend",
   "name": "net-bill-manager-frontend",
   "private": true,
   "version": "0.0.0",
@@ -8,12 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "preview": "vite preview"
   },
   "dependencies": {
     "axios": "^1.7.9",
-    "gh-pages": "^6.3.0",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
     "localforage": "^1.10.0",
