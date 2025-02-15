@@ -16,7 +16,7 @@ const Profile = () => {
       }
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/accounts/profile/update/", {
+        const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/profile/update/", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

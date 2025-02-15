@@ -64,7 +64,7 @@ const ContactUs = () => {
     e.preventDefault(); // Prevent page reload
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/contact/", formData, {
+      const response = await axios.post("https://net-bill-manager.vercel.app/api/contact/", formData, {
         headers: {
           "Content-Type": "application/json",
         },

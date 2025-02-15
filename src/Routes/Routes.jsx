@@ -42,7 +42,7 @@ const Routes = createBrowserRouter([
       element: <Announcements></Announcements>,
       loader: () =>
         fetch(
-          "http://127.0.0.1:8000/api/announcements/?format=json"
+          "https://net-bill-manager.vercel.app/api/announcements/?format=json"
         ),
     },
     {

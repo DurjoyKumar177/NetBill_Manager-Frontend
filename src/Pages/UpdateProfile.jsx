@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const UpdateProfile = () => {
-  const [profile, setProfile] = useState({
+  const [profileData, setProfileData] = useState({
     first_name: "",
     last_name: "",
     email: "",
@@ -14,7 +16,7 @@ const UpdateProfile = () => {
       building_name: "",
       room_no: "",
       router_model: "",
-      devices: "",
+      devices: [],
     },
     package_info: {
       package_number: "",
@@ -26,264 +28,347 @@ const UpdateProfile = () => {
     },
   });
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+  const navigate = useNavigate();
 
+  // Get token from localStorage
+  const token = localStorage.getItem("token");
+
+  // Fetch profile data on component mount
   useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        setError("No authentication token found. Please log in.");
-        setLoading(false);
-        return;
-      }
-
+    const fetchProfileData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/accounts/profile/update/", {
+        const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/profile/update/", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
+            Authorization: `Token ${token}`, // Include the token in the header
           },
         });
 
         if (response.ok) {
           const data = await response.json();
-          setProfile(data);
+          setProfileData(data); // Update state with fetched data
         } else {
-          setError(`Error fetching profile: ${response.status}`);
+          console.error("Failed to fetch profile data");
         }
       } catch (error) {
-        setError("An error occurred while fetching profile data.");
-      } finally {
-        setLoading(false);
+        console.error("Error fetching profile data:", error);
       }
     };
 
-    fetchProfile();
-  }, []);
+    if (token) {
+      fetchProfileData();
+    } else {
+      console.error("No token found in localStorage");
+    }
+  }, [token]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProfile((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
 
-  const handleNestedChange = (e, parent) => {
-    const { name, value } = e.target;
-    setProfile((prev) => ({
-      ...prev,
-      [parent]: {
-        ...prev[parent],
+    if (files) {
+      // Handle file inputs
+      setProfileData((prevState) => ({
+        ...prevState,
+        [name]: files[0],
+      }));
+    } else if (name.includes(".")) {
+      // Handle nested objects (additional_info and package_info)
+      const [parent, child] = name.split(".");
+      setProfileData((prevState) => ({
+        ...prevState,
+        [parent]: {
+          ...prevState[parent],
+          [child]: value,
+        },
+      }));
+    } else {
+      // Handle top-level fields
+      setProfileData((prevState) => ({
+        ...prevState,
         [name]: value,
-      },
-    }));
-  };
-
-  const handleFileChange = (e, key) => {
-    setProfile((prev) => ({
-      ...prev,
-      [key]: e.target.files[0],
-    }));
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSuccess(null);
-    setError(null);
-  
+    e.preventDefault(); // Prevent form submission
+
+    console.log("Form submitted"); // Debugging
+
     const formData = new FormData();
-  
-    // Append regular fields
-    Object.keys(profile).forEach((key) => {
-      if (typeof profile[key] !== "object" || profile[key] === null) {
-        formData.append(key, profile[key]);
-      }
-    });
-  
-    // Append nested fields in additional_info
-    Object.keys(profile.additional_info).forEach((nestedKey) => {
-      const nestedValue = profile.additional_info[nestedKey];
-      if (nestedKey === "devices") {
-        // Handle devices as a single string (comma-separated values)
-        formData.append(`additional_info[${nestedKey}]`, nestedValue.join(","));
-      } else {
-        formData.append(`additional_info[${nestedKey}]`, nestedValue);
-      }
-    });
-  
-    // Append nested fields in package_info
-    Object.keys(profile.package_info).forEach((nestedKey) => {
-      const nestedValue = profile.package_info[nestedKey];
-      if (nestedKey === "package_slip" && nestedValue) {
-        // Append file only if it exists
-        formData.append(`package_info[${nestedKey}]`, nestedValue);
-      } else if (nestedKey !== "package_slip") {
-        formData.append(`package_info[${nestedKey}]`, nestedValue);
-      }
-    });
-  
-    // Conditionally append profile_pic if it exists and is not a string (file input)
-    if (profile.profile_pic && profile.profile_pic instanceof File) {
-      formData.append("profile_pic", profile.profile_pic);
+
+    // Append top-level fields
+    formData.append("first_name", profileData.first_name);
+    formData.append("last_name", profileData.last_name);
+    formData.append("email", profileData.email);
+    formData.append("phone_number", profileData.phone_number);
+    formData.append("location", profileData.location);
+    if (profileData.profile_pic instanceof File) {
+      formData.append("profile_pic", profileData.profile_pic);
     }
-  
-    // Log the FormData to the console for debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-  
+
+    // Append additional_info fields as JSON string
+    formData.append("additional_info", JSON.stringify(profileData.additional_info));
+
+    // Append package_info fields as JSON string
+    formData.append("package_info", JSON.stringify(profileData.package_info));
+
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://127.0.0.1:8000/api/accounts/profile/update/", {
+      console.log("Sending PUT request..."); // Debugging
+      const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/profile/update/", {
         method: "PUT",
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Token ${token}`, // Include the token in the header
         },
         body: formData,
       });
-  
+
+      console.log("Response received:", response); // Debugging
+
       if (response.ok) {
-        setSuccess("Profile updated successfully!");
+        // Show success toast
+        toast.success("Profile updated successfully!", {
+          autoClose: 2000, // Close after 2 seconds
+          onClose: () => navigate("/profile"), // Redirect to /profile after toast closes
+        });
       } else {
-        const responseData = await response.json();
-        setError(`Failed to update profile: ${JSON.stringify(responseData)}`);
+        const errorData = await response.json();
+        console.error("Failed to update profile:", errorData);
+        toast.error("Failed to update profile. Please check the data and try again.");
       }
     } catch (error) {
-      setError("An error occurred while updating profile.");
+      console.error("Error updating profile:", error);
+      toast.error("An error occurred while updating the profile.");
     }
   };
-  
-  
-    
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen text-gray-600 text-lg">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-500"></div>
-        <span className="ml-3">Loading profile...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="text-red-500 text-center mt-6">{error}</div>;
-  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-white p-6">
       <div className="w-full max-w-4xl bg-white rounded-xl shadow-2xl p-8 transition-all hover:shadow-3xl">
         <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">Update Profile</h2>
-        {success && <p className="text-green-500 text-center mb-4">{success}</p>}
-        <form onSubmit={handleSubmit} className="space-y-6">
-
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Personal Information Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">First Name</label>
-              <input type="text" name="first_name" value={profile.first_name} onChange={handleChange} className="input-field" />
+              <input
+                type="text"
+                name="first_name"
+                value={profileData.first_name}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Last Name</label>
-              <input type="text" name="last_name" value={profile.last_name} onChange={handleChange} className="input-field" />
+              <input
+                type="text"
+                name="last_name"
+                value={profileData.last_name}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Email</label>
-              <input type="email" name="email" value={profile.email} onChange={handleChange} className="input-field" />
+              <input
+                type="email"
+                name="email"
+                value={profileData.email}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Phone Number</label>
-              <input type="text" name="phone_number" value={profile.phone_number} onChange={handleChange} className="input-field" />
+              <input
+                type="text"
+                name="phone_number"
+                value={profileData.phone_number}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Location</label>
-              <input type="text" name="location" value={profile.location} onChange={handleChange} className="input-field" />
+              <input
+                type="text"
+                name="location"
+                value={profileData.location}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Profile Picture</label>
-              <input type="file" name="profile_pic" onChange={(e) => handleFileChange(e, "profile_pic")} className="input-file" />
+              <input
+                type="file"
+                name="profile_pic"
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
 
+          {/* Additional Info Section */}
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-4">Additional Info</h3>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Local Area</label>
-              <input type="text" name="local_area" value={profile.additional_info.local_area} onChange={(e) => handleNestedChange(e, "additional_info")} className="input-field" />
+              <input
+                type="text"
+                name="additional_info.local_area"
+                value={profileData.additional_info.local_area}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Road Number</label>
-              <input type="text" name="road_number" value={profile.additional_info.road_number} onChange={(e) => handleNestedChange(e, "additional_info")} className="input-field" />
+              <input
+                type="text"
+                name="additional_info.road_number"
+                value={profileData.additional_info.road_number}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Building Name</label>
-              <input type="text" name="building_name" value={profile.additional_info.building_name} onChange={(e) => handleNestedChange(e, "additional_info")} className="input-field" />
+              <input
+                type="text"
+                name="additional_info.building_name"
+                value={profileData.additional_info.building_name}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Room No</label>
-              <input type="text" name="room_no" value={profile.additional_info.room_no} onChange={(e) => handleNestedChange(e, "additional_info")} className="input-field" />
+              <input
+                type="text"
+                name="additional_info.room_no"
+                value={profileData.additional_info.room_no}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Router Model</label>
-              <input type="text" name="router_model" value={profile.additional_info.router_model} onChange={(e) => handleNestedChange(e, "additional_info")} className="input-field" />
+              <input
+                type="text"
+                name="additional_info.router_model"
+                value={profileData.additional_info.router_model}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
-
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Devices</label>
-              <input type="text" name="devices" value={profile.additional_info.devices} onChange={(e) => handleNestedChange(e, "additional_info")} className="input-field" />
+              <input
+                type="text"
+                name="additional_info.devices"
+                value={profileData.additional_info.devices.join(", ")}
+                onChange={(e) => {
+                  const devices = e.target.value.split(",").map((device) => device.trim());
+                  setProfileData((prevState) => ({
+                    ...prevState,
+                    additional_info: {
+                      ...prevState.additional_info,
+                      devices,
+                    },
+                  }));
+                }}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
 
-          
-
+          {/* Package Info Section */}
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-4">Package Info</h3>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Package Number</label>
-              <input type="text" name="package_number" value={profile.package_info.package_number} onChange={(e) => handleNestedChange(e, "package_info")} className="input-field" />
+              <input
+                type="text"
+                name="package_info.package_number"
+                value={profileData.package_info.package_number}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Customer ID</label>
-              <input type="text" name="customer_id" value={profile.package_info.customer_id} onChange={(e) => handleNestedChange(e, "package_info")} className="input-field" />
+              <input
+                type="text"
+                name="package_info.customer_id"
+                value={profileData.package_info.customer_id}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">ISP Username</label>
-              <input type="text" name="isp_username" value={profile.package_info.isp_username} onChange={(e) => handleNestedChange(e, "package_info")} className="input-field" />
+              <input
+                type="text"
+                name="package_info.isp_username"
+                value={profileData.package_info.isp_username}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Package Password</label>
-              <input type="text" name="package_password" value={profile.package_info.package_password} onChange={(e) => handleNestedChange(e, "package_info")} className="input-field" />
+              <input
+                type="text"
+                name="package_info.package_password"
+                value={profileData.package_info.package_password}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Monthly Payment</label>
-              <input type="number" name="monthly_payment" value={profile.package_info.monthly_payment} onChange={(e) => handleNestedChange(e, "package_info")} className="input-field" />
+              <input
+                type="number"
+                name="package_info.monthly_payment"
+                value={profileData.package_info.monthly_payment}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex flex-col">
               <label className="font-medium text-gray-700 mb-2">Package Slip</label>
-              <input type="file" name="package_slip" onChange={(e) => handleFileChange(e, "package_slip")} className="input-file" />
+              <input
+                type="file"
+                name="package_info.package_slip"
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
 
-          <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg w-full transition-transform transform hover:scale-105 mt-8">
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg w-full transition-transform transform hover:scale-105 mt-8"
+          >
             Update Profile
           </button>
         </form>
@@ -293,44 +378,3 @@ const UpdateProfile = () => {
 };
 
 export default UpdateProfile;
-
-// Add these styles to your CSS or Tailwind config
-const styles = `
-  .input-field {
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    color: #374151;
-    background-color: #f9fafb;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  }
-
-  .input-field:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-
-  .input-file {
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    color: #374151;
-    background-color: #f9fafb;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  }
-
-  .input-file:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-`;
-
-// Inject styles into the document
-const styleSheet = document.createElement("style");
-styleSheet.type = "text/css";
-styleSheet.innerText = styles;
-document.head.appendChild(styleSheet);

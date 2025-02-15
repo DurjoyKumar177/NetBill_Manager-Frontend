@@ -24,7 +24,7 @@ const Announcements = () => {
   useEffect(() => {
     const fetchUserType = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/accounts/user-type/", {
+        const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/user-type/", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

@@ -22,7 +22,7 @@ function Payments() {
           return;
         }
 
-        const response = await fetch("http://127.0.0.1:8000/api/accounts/user-type/", {
+        const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/user-type/", {
           headers: {
             Authorization: `Token ${token}`,
           },
@@ -51,7 +51,7 @@ function Payments() {
   const fetchBills = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://127.0.0.1:8000/api/bills/", {
+      const response = await fetch("https://net-bill-manager.vercel.app/api/bills/", {
         headers: {
           Authorization: `Token ${token}`,
         },
@@ -74,7 +74,7 @@ function Payments() {
     setSuccessMessage(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/bills/collections/", {
+      const response = await fetch("https://net-bill-manager.vercel.app/api/bills/collections/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

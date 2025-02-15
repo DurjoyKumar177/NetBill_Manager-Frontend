@@ -42,7 +42,7 @@ const Register = () => {
         });
         
         try {
-            const response = await axios.post("http://127.0.0.1:8000/api/accounts/register/", formDataToSend, {
+            const response = await axios.post("https://net-bill-manager.vercel.app/api/accounts/register/", formDataToSend, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             alert("Registration Successful");

@@ -16,7 +16,7 @@ function MakePayments() {
           return;
         }
 
-        const response = await fetch("http://127.0.0.1:8000/api/bills/", {
+        const response = await fetch("https://net-bill-manager.vercel.app/api/bills/", {
           headers: {
             Authorization: `Token ${token}`, // Attach the token with 'Token' instead of 'Bearer'
           },
@@ -55,7 +55,7 @@ function MakePayments() {
 
     // Proceed with payment submission
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/bills/payments/", {
+      const response = await fetch("https://net-bill-manager.vercel.app/api/bills/payments/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -20,7 +20,7 @@ const History = () => {
 
       try {
         // Fetch user type
-        const userTypeResponse = await fetch("http://127.0.0.1:8000/api/accounts/user-type/", {
+        const userTypeResponse = await fetch("https://net-bill-manager.vercel.app/api/accounts/user-type/", {
           headers: { Authorization: `Token ${token}` },
         });
         const userTypeData = await userTypeResponse.json();
@@ -35,8 +35,8 @@ const History = () => {
 
         // Fetch history
         const apiUrl = isStaff
-          ? "http://127.0.0.1:8000/api/bills/collection-history/"
-          : "http://127.0.0.1:8000/api/bills/payment-history/";
+          ? "https://net-bill-manager.vercel.app/api/bills/collection-history/"
+          : "https://net-bill-manager.vercel.app/api/bills/payment-history/";
 
         const response = await fetch(apiUrl, {
           headers: { Authorization: `Token ${token}` },

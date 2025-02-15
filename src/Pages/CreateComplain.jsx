@@ -15,7 +15,7 @@ const CreateComplain = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch("http://127.0.0.1:8000/api/complains/categories/", {
+                const response = await fetch("https://net-bill-manager.vercel.app/api/complains/categories/", {
                     headers: { "Authorization": `Token ${token}` },
                 });
                 const data = await response.json();
@@ -36,7 +36,7 @@ const CreateComplain = () => {
         Array.from(files).forEach((file) => formData.append("files", file));
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/complains/", {
+            const response = await fetch("https://net-bill-manager.vercel.app/api/complains/", {
                 method: "POST",
                 headers: { "Authorization": `Token ${token}` },
                 body: formData,

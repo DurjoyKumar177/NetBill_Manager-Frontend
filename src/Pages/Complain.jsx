@@ -15,11 +15,11 @@ const Complaints = () => {
   const headers = { Authorization: `Token ${token}` };
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/accounts/user-type/", { headers })
+    axios.get("https://net-bill-manager.vercel.app/api/accounts/user-type/", { headers })
       .then(res => setUserType(res.data.user_type))
       .catch(err => console.error("Error fetching user type", err));
 
-    axios.get("http://127.0.0.1:8000/api/complains/", { headers })
+    axios.get("https://net-bill-manager.vercel.app/api/complains/", { headers })
       .then(res => setComplaints(res.data.reverse()))
       .catch(err => console.error("Error fetching complaints", err));
   }, []);
@@ -28,7 +28,7 @@ const Complaints = () => {
     if (expandedReplies[complainId]) {
       setExpandedReplies(prev => ({ ...prev, [complainId]: false }));
     } else {
-      axios.get(`http://127.0.0.1:8000/api/complains/${complainId}/replies/`, { headers })
+      axios.get(`https://net-bill-manager.vercel.app/api/complains/${complainId}/replies/`, { headers })
         .then(res => {
           setReplies(prev => ({ ...prev, [complainId]: res.data }));
           setExpandedReplies(prev => ({ ...prev, [complainId]: true }));
@@ -38,7 +38,7 @@ const Complaints = () => {
   };
 
   const handleReplySubmit = (complainId) => {
-    axios.post(`http://127.0.0.1:8000/api/complains/${complainId}/reply/`, {
+    axios.post(`https://net-bill-manager.vercel.app/api/complains/${complainId}/reply/`, {
       complain: complainId,
       message: replyMessage,
     }, { headers })

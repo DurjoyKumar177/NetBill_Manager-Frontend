@@ -9,7 +9,7 @@ const Comments = () => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/announcements/comments/");
+        const response = await fetch("https://net-bill-manager.vercel.app/api/announcements/comments/");
         if (!response.ok) throw new Error("Failed to fetch comments");
         const data = await response.json();
         setComments(data);
@@ -27,7 +27,7 @@ const Comments = () => {
     if (!newComment.trim()) return;
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/announcements/comments/", {
+      const response = await fetch("https://net-bill-manager.vercel.app/api/announcements/comments/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

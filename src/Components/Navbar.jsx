@@ -29,7 +29,7 @@ const Navbar = () => {
   // Fetch user profile
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/accounts/profile/update/", {
+      const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/profile/update/", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -49,7 +49,7 @@ const Navbar = () => {
   // Fetch user type
   const fetchUserType = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/accounts/user-type/", {
+      const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/user-type/", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -98,7 +98,7 @@ const Navbar = () => {
   // Logout user
   const logoutUser = async () => {
     try {
-      await fetch("http://127.0.0.1:8000/api/accounts/auth/logout/", {
+      await fetch("https://net-bill-manager.vercel.app/api/accounts/auth/logout/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
