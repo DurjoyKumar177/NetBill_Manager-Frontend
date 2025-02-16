@@ -40,10 +40,6 @@ const Routes = createBrowserRouter([
     {
       path: "/announcements",
       element: <Announcements></Announcements>,
-      loader: () =>
-        fetch(
-          "https://net-bill-manager.vercel.app/api/announcements/?format=json"
-        ),
     },
     {
       path:"/login",

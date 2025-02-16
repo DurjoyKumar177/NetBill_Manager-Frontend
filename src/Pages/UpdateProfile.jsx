@@ -224,7 +224,7 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="additional_info.local_area"
-                value={profileData.additional_info.local_area}
+                value={profileData.additional_info?.local_area}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -235,7 +235,7 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="additional_info.road_number"
-                value={profileData.additional_info.road_number}
+                value={profileData.additional_info?.road_number}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -246,7 +246,7 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="additional_info.building_name"
-                value={profileData.additional_info.building_name}
+                value={profileData.additional_info?.building_name}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -257,7 +257,7 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="additional_info.room_no"
-                value={profileData.additional_info.room_no}
+                value={profileData.additional_info?.room_no}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -268,7 +268,7 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="additional_info.router_model"
-                value={profileData.additional_info.router_model}
+                value={profileData.additional_info?.router_model}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -279,7 +279,7 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="additional_info.devices"
-                value={profileData.additional_info.devices.join(", ")}
+                value={profileData.additional_info?.devices.join(", ")}
                 onChange={(e) => {
                   const devices = e.target.value.split(",").map((device) => device.trim());
                   setProfileData((prevState) => ({
@@ -303,7 +303,7 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="package_info.package_number"
-                value={profileData.package_info.package_number}
+                value={profileData.package_info?.package_number}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -314,7 +314,7 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="package_info.customer_id"
-                value={profileData.package_info.customer_id}
+                value={profileData.package_info?.customer_id}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -325,7 +325,7 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="package_info.isp_username"
-                value={profileData.package_info.isp_username}
+                value={profileData.package_info?.isp_username}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -336,7 +336,7 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="package_info.package_password"
-                value={profileData.package_info.package_password}
+                value={profileData.package_info?.package_password}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -347,7 +347,7 @@ const UpdateProfile = () => {
               <input
                 type="number"
                 name="package_info.monthly_payment"
-                value={profileData.package_info.monthly_payment}
+                value={profileData.package_info?.monthly_payment}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />

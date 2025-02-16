@@ -1,4 +1,5 @@
-import { useLoaderData, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   FaThumbsUp,
   FaRegComment,
@@ -9,43 +10,58 @@ import {
   FaSadTear,
   FaAngry,
 } from "react-icons/fa";
-import { useState, useEffect } from "react";
 
 const Announcements = () => {
-  const announcements = useLoaderData();
+  const [announcements, setAnnouncements] = useState([]);
   const [reactions, setReactions] = useState({});
-  const [showReactions, setShowReactions] = useState(null);
   const [comments, setComments] = useState({});
   const [newComments, setNewComments] = useState({});
   const [userType, setUserType] = useState(null);
   const [showAllMedia, setShowAllMedia] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showReactions, setShowReactions] = useState(null);
+  const [showCommentSection, setShowCommentSection] = useState({});
 
-  // Fetch user type from API
+  // Fetch announcements and user type
   useEffect(() => {
-    const fetchUserType = async () => {
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+
       try {
-        const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/user-type/", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        const data = await response.json();
-        setUserType(data.user_type);
+        // Fetch user type
+        const userTypeResponse = await fetch(
+          "https://net-bill-manager.vercel.app/api/accounts/user-type/",
+          {
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
+        const userTypeData = await userTypeResponse.json();
+        if (userTypeResponse.ok) {
+          setUserType(userTypeData.user_type);
+        }
+
+        // Fetch announcements
+        const announcementsResponse = await fetch(
+          "https://net-bill-manager.vercel.app/api/announcements/",
+          {
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
+        const announcementsData = await announcementsResponse.json();
+        setAnnouncements(announcementsData);
       } catch (error) {
-        console.error("Error fetching user type:", error);
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUserType();
+    fetchData();
   }, []);
-
-  if (!announcements) {
-    return <div className="text-center text-gray-500">Loading...</div>;
-  }
-
-  if (announcements.length === 0) {
-    return <div className="text-center text-gray-500">No announcements available.</div>;
-  }
 
   const getMediaType = (file) => {
     const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
@@ -60,13 +76,12 @@ const Announcements = () => {
     return "unknown";
   };
 
-  const handleReaction = (postId, reaction) => {
-    setReactions((prev) => ({ ...prev, [postId]: reaction }));
-    setShowReactions(null);
-  };
-
+  // Toggle comment section visibility
   const handleToggleComments = (postId) => {
-    setComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
+    setShowCommentSection((prev) => ({
+      ...prev,
+      [postId]: !prev[postId], // Toggle visibility for the specific post
+    }));
   };
 
   const handleCommentChange = (postId, text) => {
@@ -75,11 +90,20 @@ const Announcements = () => {
 
   const handleAddComment = (postId) => {
     if (!newComments[postId]) return;
+
+    // Add the new comment as a single item in the array
     setComments((prev) => ({
       ...prev,
-      [postId]: [...(prev[postId] || []), newComments[postId]],
+      [postId]: [...(Array.isArray(prev[postId]) ? prev[postId] : []), newComments[postId]],
     }));
+
+    // Clear the input field
     setNewComments((prev) => ({ ...prev, [postId]: "" }));
+  };
+
+  const handleReaction = (postId, reaction) => {
+    setReactions((prev) => ({ ...prev, [postId]: reaction }));
+    setShowReactions(null); // Hide reaction options after selection
   };
 
   const getGridClass = (mediaLength) => {
@@ -92,14 +116,26 @@ const Announcements = () => {
     return !showAllMedia && mediaLength > 4 && index >= 3;
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (announcements.length === 0) {
+    return <div className="text-center text-gray-500">No announcements available.</div>;
+  }
+
   return (
     <div className="max-w-2xl mx-auto mt-4">
       {/* Show "Create Announcement" button for staff */}
       {userType === "staff" && (
-        <div className="mb-4 flex justify-end">
+        <div className="mb-4 flex justify-center">
           <Link
             to="/announcement-form"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 py-2 rounded-md hover:from-blue-600 hover:to-blue-800"
           >
             Create Announcement
           </Link>
@@ -153,10 +189,54 @@ const Announcements = () => {
           )}
 
           <div className="flex justify-between items-center mt-3 border-t pt-2 text-gray-600 text-sm">
-            <button className="flex items-center space-x-1 hover:text-blue-500">
-              <FaThumbsUp />
-              <span>Like</span>
-            </button>
+            <div className="relative">
+              <button
+                className="flex items-center space-x-1 hover:text-blue-500"
+                onClick={() => setShowReactions(post.id)}
+              >
+                {reactions[post.id] ? reactions[post.id].icon : <FaThumbsUp />}
+                <span>
+                  {reactions[post.id] ? reactions[post.id].label : "Like"}
+                </span>
+              </button>
+              {showReactions === post.id && (
+                <div className="absolute -top-10 left-0 flex space-x-2 bg-white shadow-md p-2 rounded-lg">
+                  {[
+                    {
+                      icon: <FaThumbsUp className="text-blue-500" />,
+                      label: "Like",
+                    },
+                    {
+                      icon: <FaHeart className="text-red-500" />,
+                      label: "Love",
+                    },
+                    {
+                      icon: <FaLaugh className="text-yellow-500" />,
+                      label: "Haha",
+                    },
+                    {
+                      icon: <FaSurprise className="text-orange-500" />,
+                      label: "Wow",
+                    },
+                    {
+                      icon: <FaSadTear className="text-blue-400" />,
+                      label: "Sad",
+                    },
+                    {
+                      icon: <FaAngry className="text-red-600" />,
+                      label: "Angry",
+                    },
+                  ].map((r, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleReaction(post.id, r)}
+                    >
+                      {r.icon}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               className="flex items-center space-x-1 hover:text-blue-500"
               onClick={() => handleToggleComments(post.id)}
@@ -166,26 +246,32 @@ const Announcements = () => {
             </button>
           </div>
 
-          <div className="mt-3">
-            {comments[post.id]?.map((comment, index) => (
-              <p key={index} className="text-sm text-gray-600 border-b pb-1">{comment}</p>
-            ))}
-            <div className="flex mt-2">
-              <input
-                type="text"
-                value={newComments[post.id] || ""}
-                onChange={(e) => handleCommentChange(post.id, e.target.value)}
-                placeholder="Write a comment..."
-                className="border rounded-md p-1 flex-1"
-              />
-              <button
-                onClick={() => handleAddComment(post.id)}
-                className="ml-2 px-3 py-1 bg-blue-500 text-white rounded-md"
-              >
-                Post
-              </button>
+          {/* Show comment section only if `showCommentSection[post.id]` is true */}
+          {showCommentSection[post.id] && (
+            <div className="mt-3">
+              {Array.isArray(comments[post.id]) &&
+                comments[post.id].map((comment, index) => (
+                  <p key={index} className="text-sm text-gray-600 border-b pb-1">
+                    {comment}
+                  </p>
+                ))}
+              <div className="flex mt-2">
+                <input
+                  type="text"
+                  value={newComments[post.id] || ""}
+                  onChange={(e) => handleCommentChange(post.id, e.target.value)}
+                  placeholder="Write a comment..."
+                  className="border rounded-md p-1 flex-1"
+                />
+                <button
+                  onClick={() => handleAddComment(post.id)}
+                  className="ml-2 px-3 py-1 bg-blue-500 text-white rounded-md"
+                >
+                  Post
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       ))}
     </div>
