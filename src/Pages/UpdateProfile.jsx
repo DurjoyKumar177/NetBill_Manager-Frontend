@@ -1,46 +1,46 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const UpdateProfile = () => {
   const [profileData, setProfileData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone_number: "",
-    location: "",
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone_number: '',
+    location: '',
     profile_pic: null,
     additional_info: {
-      local_area: "",
-      road_number: "",
-      building_name: "",
-      room_no: "",
-      router_model: "",
+      local_area: '',
+      road_number: '',
+      building_name: '',
+      room_no: '',
+      router_model: '',
       devices: [],
     },
     package_info: {
-      package_number: "",
-      customer_id: "",
-      isp_username: "",
-      package_password: "",
-      monthly_payment: "",
+      package_number: '',
+      customer_id: '',
+      isp_username: '',
+      package_password: '',
+      monthly_payment: '',
       package_slip: null,
     },
   });
 
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
   // Get token from localStorage
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
   // Fetch profile data on component mount
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/profile/update/", {
-          method: "GET",
+        const response = await fetch('https://net-bill-manager.vercel.app/api/accounts/profile/update/', {
+          method: 'GET',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Token ${token}`, // Include the token in the header
           },
         });
@@ -49,17 +49,17 @@ const UpdateProfile = () => {
           const data = await response.json();
           setProfileData(data); // Update state with fetched data
         } else {
-          console.error("Failed to fetch profile data");
+          console.error('Failed to fetch profile data');
         }
       } catch (error) {
-        console.error("Error fetching profile data:", error);
+        console.error('Error fetching profile data:', error);
       }
     };
 
     if (token) {
       fetchProfileData();
     } else {
-      console.error("No token found in localStorage");
+      console.error('No token found in localStorage');
     }
   }, [token]);
 
@@ -72,9 +72,9 @@ const UpdateProfile = () => {
         ...prevState,
         [name]: files[0],
       }));
-    } else if (name.includes(".")) {
+    } else if (name.includes('.')) {
       // Handle nested objects (additional_info and package_info)
-      const [parent, child] = name.split(".");
+      const [parent, child] = name.split('.');
       setProfileData((prevState) => ({
         ...prevState,
         [parent]: {
@@ -92,54 +92,44 @@ const UpdateProfile = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent form submission
-
-    console.log("Form submitted"); // Debugging
+    e.preventDefault();
 
     const formData = new FormData();
 
     // Append top-level fields
-    formData.append("first_name", profileData.first_name);
-    formData.append("last_name", profileData.last_name);
-    formData.append("email", profileData.email);
-    formData.append("phone_number", profileData.phone_number);
-    formData.append("location", profileData.location);
+    formData.append('first_name', profileData.first_name);
+    formData.append('last_name', profileData.last_name);
+    formData.append('email', profileData.email);
+    formData.append('phone_number', profileData.phone_number);
+    formData.append('location', profileData.location);
     if (profileData.profile_pic instanceof File) {
-      formData.append("profile_pic", profileData.profile_pic);
+      formData.append('profile_pic', profileData.profile_pic);
     }
 
     // Append additional_info fields as JSON string
-    formData.append("additional_info", JSON.stringify(profileData.additional_info));
+    formData.append('additional_info', JSON.stringify(profileData.additional_info));
 
     // Append package_info fields as JSON string
-    formData.append("package_info", JSON.stringify(profileData.package_info));
+    formData.append('package_info', JSON.stringify(profileData.package_info));
 
     try {
-      console.log("Sending PUT request..."); // Debugging
-      const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/profile/update/", {
-        method: "PUT",
+      const response = await fetch('https://net-bill-manager.vercel.app/api/accounts/profile/update/', {
+        method: 'PUT',
         headers: {
           Authorization: `Token ${token}`, // Include the token in the header
         },
         body: formData,
       });
 
-      console.log("Response received:", response); // Debugging
-
       if (response.ok) {
-        // Show success toast
-        toast.success("Profile updated successfully!", {
-          autoClose: 2000, // Close after 2 seconds
-          onClose: () => navigate("/profile"), // Redirect to /profile after toast closes
-        });
+        setSuccessMessage('Profile updated successfully!');
+        navigate('/profile');
       } else {
         const errorData = await response.json();
-        console.error("Failed to update profile:", errorData);
-        toast.error("Failed to update profile. Please check the data and try again.");
+        console.error('Failed to update profile:', errorData);
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("An error occurred while updating the profile.");
+      console.error('Error updating profile:', error);
     }
   };
 
@@ -148,6 +138,8 @@ const UpdateProfile = () => {
       <div className="w-full max-w-4xl bg-white rounded-xl shadow-2xl p-8 transition-all hover:shadow-3xl">
         <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">Update Profile</h2>
         <form className="space-y-6" onSubmit={handleSubmit}>
+          {successMessage && <p className="text-green-500 text-center mb-4">{successMessage}</p>}
+
           {/* Personal Information Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col">
@@ -279,9 +271,9 @@ const UpdateProfile = () => {
               <input
                 type="text"
                 name="additional_info.devices"
-                value={profileData.additional_info?.devices.join(", ")}
+                value={profileData.additional_info?.devices.join(', ')}
                 onChange={(e) => {
-                  const devices = e.target.value.split(",").map((device) => device.trim());
+                  const devices = e.target.value.split(',').map((device) => device.trim());
                   setProfileData((prevState) => ({
                     ...prevState,
                     additional_info: {

@@ -1,70 +1,57 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import profilePlaceholder from "../assets/profile_placeholder.jpg";
 import netBillLogo from "../assets/NetBill.png";
 
-const Navbar = () => {
+const Navbar = memo(() => {
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [isNotificationOpen, setNotificationOpen] = useState(false);
   const [isAuthenticated, setAuthenticated] = useState(false);
-  const [profilePic, setProfilePic] = useState(null);
-  const [userType, setUserType] = useState(null);
+  const [userData, setUserData] = useState({ profilePic: null, userType: null });
   const navigate = useNavigate();
-  const location = useLocation(); // Get current location
+  const location = useLocation();
 
-  // Fetch user data on mount and when authentication state changes
+  // Fetch user data on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token && token !== "null") {
       setAuthenticated(true);
-      fetchUserProfile();
-      fetchUserType();
+      fetchUserData();
     } else {
       setAuthenticated(false);
-      setUserType(null);
-      setProfilePic(null);
+      setUserData({ profilePic: null, userType: null });
     }
-  }, [isAuthenticated]); // Re-run when isAuthenticated changes
+  }, []); // Run only once on mount
 
-  // Fetch user profile
-  const fetchUserProfile = async () => {
+  // Fetch user profile and type
+  const fetchUserData = useCallback(async () => {
     try {
-      const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/profile/update/", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${localStorage.getItem("token")}`,
-        },
-      });
+      const [profileResponse, userTypeResponse] = await Promise.all([
+        fetch("https://net-bill-manager.vercel.app/api/accounts/profile/update/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }),
+        fetch("https://net-bill-manager.vercel.app/api/accounts/user-type/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }),
+      ]);
 
-      if (response.ok) {
-        const data = await response.json();
-        setProfilePic(data.profile_pic);
+      if (profileResponse.ok && userTypeResponse.ok) {
+        const profileData = await profileResponse.json();
+        const userTypeData = await userTypeResponse.json();
+        setUserData({ profilePic: profileData.profile_pic, userType: userTypeData.user_type });
       }
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      console.error("Error fetching user data:", error);
     }
-  };
-
-  // Fetch user type
-  const fetchUserType = async () => {
-    try {
-      const response = await fetch("https://net-bill-manager.vercel.app/api/accounts/user-type/", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUserType(data.user_type);
-      }
-    } catch (error) {
-      console.error("Error fetching user type:", error);
-    }
-  };
+  }, []);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -149,7 +136,7 @@ const Navbar = () => {
             >
               Announcements
             </a>
-            {isAuthenticated && userType === "staff" ? (
+            {isAuthenticated && userData.userType === "staff" ? (
               <>
                 <a
                   href="/complains"
@@ -168,7 +155,7 @@ const Navbar = () => {
                   Collections
                 </a>
               </>
-            ) : isAuthenticated && userType === "user" ? (
+            ) : isAuthenticated && userData.userType === "user" ? (
               <>
                 <a
                   href="/complains"
@@ -256,14 +243,14 @@ const Navbar = () => {
               <div className="relative ml-3 profile-dropdown">
                 <button onClick={toggleProfileMenu} className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none hover:ring-2 hover:ring-gray-500">
                   <img className="h-8 w-8 rounded-full" 
-                    src={profilePic ? profilePic : profilePlaceholder} 
+                    src={userData.profilePic ? userData.profilePic : profilePlaceholder} 
                     alt="User Profile" 
                   />
                 </button>
                 {isProfileOpen && (
                   <div className="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg">
                     <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
-                    {userType === "staff" ? (
+                    {userData.userType === "staff" ? (
                       <a href="/History" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Collections</a>
                     ) : (
                       <a href="/History" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">History</a>
@@ -278,6 +265,6 @@ const Navbar = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Navbar;
