@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa";
 
 const Announcements = () => {
-  const [announcements, setAnnouncements] = useState([]);
+  const [announcements, setAnnouncements] = useState([]); // Initialize as an empty array
   const [reactions, setReactions] = useState({});
   const [comments, setComments] = useState({});
   const [newComments, setNewComments] = useState({});
@@ -45,14 +45,12 @@ const Announcements = () => {
         // Fetch announcements
         const announcementsResponse = await fetch(
           "https://net-bill-manager.vercel.app/api/announcements/",
-          {
-            headers: {
-              Authorization: `Token ${token}`,
-            },
-          }
+          
         );
         const announcementsData = await announcementsResponse.json();
-        setAnnouncements(announcementsData);
+
+        // Ensure announcementsData is always an array
+        setAnnouncements(Array.isArray(announcementsData) ? announcementsData : []);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -124,7 +122,7 @@ const Announcements = () => {
     );
   }
 
-  if (announcements.length === 0) {
+  if (!Array.isArray(announcements) || announcements.length === 0) {
     return <div className="text-center text-gray-500">No announcements available.</div>;
   }
 
