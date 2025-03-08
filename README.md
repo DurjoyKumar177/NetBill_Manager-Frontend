@@ -1,6 +1,5 @@
 # NetBill Manager - Frontend
 
-![NetBill Manager](https://banner-image-url.com)
 
 ## 🚀 Overview
 **NetBill Manager** is a web-based **ISP bill management system** designed to optimize and digitize bill collection for local ISP providers. Traditionally, ISP providers in our country collect bills manually by visiting customers' homes and providing paper receipts. This project eliminates the need for paper-based transactions by offering an online bill payment and management system. **NetBill Manager** also streamlines customer service through announcements, complaints, and profile management, making ISP operations more efficient and convenient.
