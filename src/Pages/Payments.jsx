@@ -11,6 +11,7 @@ function Payments() {
   const [collectionResponse, setCollectionResponse] = useState(null);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [loading, setLoading] = useState(false); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,6 +50,7 @@ function Payments() {
   }, [userType]);
 
   const fetchBills = async () => {
+    setLoading(true); // Set loading to true before fetching bills
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("https://net-bill-manager.vercel.app/api/bills/", {
@@ -65,6 +67,8 @@ function Payments() {
       }
     } catch (error) {
       toast.error("Error fetching bills.");
+    } finally {
+      setLoading(false); // Set loading to false after fetching bills
     }
   };
 
@@ -90,7 +94,7 @@ function Payments() {
       const data = await response.json();
 
       if (!response.ok) {
-        //  Handle API validation errors
+        // Handle API validation errors
         if (data.non_field_errors) {
           setError(data.non_field_errors[0]);
         } else if (data.customer_id) {
@@ -122,37 +126,38 @@ function Payments() {
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-       {/* ✅ Success Message at the Top */}
-       {collectionResponse && (
-  <div className="mb-6 p-4 bg-green-100 border border-green-400 rounded-lg shadow-md">
-    <h3 className="text-lg font-semibold text-green-600">
-      ✅ Payment Collected Successfully!
-    </h3>
-    <p>
-      <strong>Month:</strong> {collectionResponse.display_month} {/* ✅ Fixed Month Display */}
-    </p>
-    <p>
-      <strong>Collected From:</strong> {collectionResponse.user.username}{" "}
-      ({collectionResponse.user.location}) {/* ✅ Showing Username & Location */}
-    </p>
-    <p>
-      <strong>Amount:</strong> {collectionResponse.amount} TK
-    </p>
-    <p>
-      <strong>Collection Date:</strong>{" "}
-      {new Date(collectionResponse.collection_date).toLocaleString()}
-    </p>
-  </div>
-)}
+      {/* ✅ Success Message at the Top */}
+      {collectionResponse && (
+        <div className="mb-6 p-4 bg-green-100 border border-green-400 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-green-600">
+            ✅ Payment Collected Successfully!
+          </h3>
+          <p>
+            <strong>Month:</strong> {collectionResponse.display_month}{" "}
+            {/* ✅ Fixed Month Display */}
+          </p>
+          <p>
+            <strong>Collected From:</strong> {collectionResponse.user.username}{" "}
+            ({collectionResponse.user.location}) {/* ✅ Showing Username & Location */}
+          </p>
+          <p>
+            <strong>Amount:</strong> {collectionResponse.amount} TK
+          </p>
+          <p>
+            <strong>Collection Date:</strong>{" "}
+            {new Date(collectionResponse.collection_date).toLocaleString()}
+          </p>
+        </div>
+      )}
 
-      {/*  Display Error Message */}
+      {/* Display Error Message */}
       {error && (
         <div className="mb-6 p-4 bg-red-100 border border-red-400 rounded-lg shadow-md">
           <p className="text-red-600">{error}</p>
         </div>
       )}
 
-      {/*  Pay Now Button at the Top */}
+      {/* Pay Now Button at the Top */}
       {userType === "user" && (
         <div className="flex justify-center mb-6">
           <button
@@ -168,10 +173,14 @@ function Payments() {
         {userType === "staff" ? "Payment Collection" : "Pending Bills"}
       </h2>
 
-      {/*  User View: Show Pending Bills */}
+      {/* User View: Show Pending Bills */}
       {userType === "user" && (
         <div>
-          {bills.length > 0 ? (
+          {loading ? ( // Show loader while loading
+            <div className="flex justify-center items-center">
+              <span className="loading loading-bars loading-lg text-primary"></span>
+            </div>
+          ) : bills.length > 0 ? (
             <div className="space-y-4">
               {bills.map((bill) => (
                 <div key={bill.id} className="p-4 bg-red-100 border border-red-400 rounded-lg shadow-md">

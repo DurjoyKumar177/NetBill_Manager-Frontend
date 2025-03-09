@@ -9,6 +9,7 @@ const Complaints = () => {
   const [replyMessage, setReplyMessage] = useState("");
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [expandedReplies, setExpandedReplies] = useState({});
+  const [loading, setLoading] = useState(true); // loading
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
@@ -20,8 +21,14 @@ const Complaints = () => {
       .catch(err => console.error("Error fetching user type", err));
 
     axios.get("https://net-bill-manager.vercel.app/api/complains/", { headers })
-      .then(res => setComplaints(res.data.reverse()))
-      .catch(err => console.error("Error fetching complaints", err));
+      .then(res => {
+        setComplaints(res.data.reverse());
+        setLoading(false); // Set loading to false after fetching complaints
+      })
+      .catch(err => {
+        console.error("Error fetching complaints", err);
+        setLoading(false); // Set loading to false even if there's an error
+      });
   }, []);
 
   const fetchReplies = (complainId) => {
@@ -65,7 +72,11 @@ const Complaints = () => {
           )}
         </div>
         <h2 className="text-2xl font-bold mb-4 text-blue-600">My Complaints</h2>
-        {complaints.length === 0 ? (
+        {loading ? ( // Show loader while loading
+          <div className="flex justify-center items-center">
+            <span className="loading loading-spinner loading-lg text-blue-600"></span>
+          </div>
+        ) : complaints.length === 0 ? (
           <p className="text-center">No complaints found.</p>
         ) : (
           complaints.map(complain => (

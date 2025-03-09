@@ -48,7 +48,8 @@ const Login = () => {
 
       if (response.ok) {
         localStorage.setItem("token", data.key);
-        navigate("/Home");
+        window.location.reload();
+        navigate("/Home"); 
       } else {
         setError(data.non_field_errors?.[0] || "Invalid credentials");
       }
