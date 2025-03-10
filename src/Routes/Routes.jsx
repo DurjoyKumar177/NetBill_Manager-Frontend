@@ -23,6 +23,7 @@ import CreateComplain from "../Pages/CreateComplain";
 import PaymentSuccess from "../Pages/PaymentSuccess";
 import PaymentFailed from "../Pages/PaymentFailed";
 import PaymentCancel from "../Pages/PaymentCalcel";
+import PackageDetails from "../Pages/PackageDetails";
 
 
 const Routes = createBrowserRouter([
@@ -120,6 +121,10 @@ const Routes = createBrowserRouter([
     {
       path: "/change_password",
       element: <ChangePassword />,
+    },
+    {
+      path: "/package/:packageName", 
+      element: <PackageDetails />,
     },
 
 

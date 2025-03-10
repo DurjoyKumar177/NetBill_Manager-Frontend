@@ -1,10 +1,19 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
 const PackagePlans = () => {
+  const navigate = useNavigate();
+
   const packages = [
-    { name: "Package-1", price: 599, yearlyPrice: 5450, description: "Perfect for getting started" },
-    { name: "Package-2", price: 699, yearlyPrice: 6490, description: "Ideal for growing users" },
-    { name: "Package-3", price: 799, yearlyPrice: 7490, description: "Best for professionals" },
-    { name: "Package-4", price: 999, yearlyPrice: 8490, description: "Tailored for businesses" }
+    { name: "Package-1", price: 599, yearlyPrice: 5450, description: "Perfect for getting started", speed: "Up to 5 Mbps" },
+    { name: "Package-2", price: 699, yearlyPrice: 6490, description: "Ideal for growing users", speed: "Up to 8 Mbps" },
+    { name: "Package-3", price: 799, yearlyPrice: 7490, description: "Best for professionals", speed: "Up to 10 Mbps" },
+    { name: "Package-4", price: 999, yearlyPrice: 8490, description: "Tailored for businesses", speed: "Up to 12 Mbps" }
   ];
+
+  const handleSubscribeClick = (pkg) => {
+    navigate(`/package/${pkg.name}`, { state: { package: pkg } });
+  };
 
   return (
     <div className="bg-base-200 p-6">
@@ -32,14 +41,17 @@ const PackagePlans = () => {
             <div className="bg-gray-100 rounded-lg shadow-md p-5 mt-4 transition duration-300 group-hover:bg-blue-700 group-hover:text-white">
               <h4 className="text-lg font-semibold text-gray-800 transition group-hover:text-white">Features:</h4>
               <ul className="mt-2 space-y-2 text-gray-600 transition group-hover:text-white">
-                <li>✅ Speed: Up to 10 Mbps</li>
+                <li>✅ Speed: {pkg.speed}</li> {/* Dynamic speed */}
                 <li>✅ Data Limit: Unlimited (Fair Usage Policy Applies)</li>
                 <li>✅ Support: Standard Customer Support (9 AM - 9 PM)</li>
                 <li>✅ IP Type: Real IP</li>
                 <li>✅ IPv6 Available</li>
                 <li>✅ 1-8 contention ratio</li>
               </ul>
-              <button className="mt-5 w-full bg-blue-600 text-white font-semibold py-2 rounded-lg transition duration-300 hover:bg-white hover:text-blue-600 hover:border-blue-600 border">
+              <button 
+                onClick={() => handleSubscribeClick(pkg)} 
+                className="mt-5 w-full bg-blue-600 text-white font-semibold py-2 rounded-lg transition duration-300 hover:bg-white hover:text-blue-600 hover:border-blue-600 border"
+              >
                 Subscribe Now
               </button>
             </div>
