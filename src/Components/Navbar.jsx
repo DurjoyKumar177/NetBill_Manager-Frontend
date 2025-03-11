@@ -8,6 +8,7 @@ const Navbar = memo(() => {
   const [isNotificationOpen, setNotificationOpen] = useState(false);
   const [isAuthenticated, setAuthenticated] = useState(false);
   const [userData, setUserData] = useState({ profilePic: null, userType: null });
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false); // State for mobile menu
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,7 +22,7 @@ const Navbar = memo(() => {
       setAuthenticated(false);
       setUserData({ profilePic: null, userType: null });
     }
-  }, []); // Run only once on mount
+  }, []);
 
   // Fetch user profile and type
   const fetchUserData = useCallback(async () => {
@@ -62,13 +63,16 @@ const Navbar = memo(() => {
       if (isNotificationOpen && !event.target.closest(".notification-dropdown")) {
         setNotificationOpen(false);
       }
+      if (isMobileMenuOpen && !event.target.closest(".mobile-menu")) {
+        setMobileMenuOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isProfileOpen, isNotificationOpen]);
+  }, [isProfileOpen, isNotificationOpen, isMobileMenuOpen]);
 
   // Toggle profile menu
   const toggleProfileMenu = () => {
@@ -80,6 +84,11 @@ const Navbar = memo(() => {
   const toggleNotification = () => {
     setNotificationOpen(!isNotificationOpen);
     setProfileOpen(false);
+  };
+
+  // Toggle mobile menu
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!isMobileMenuOpen);
   };
 
   // Logout user
@@ -107,7 +116,7 @@ const Navbar = memo(() => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 shadow-lg">
+    <div className="sticky top-0 z-50 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 shadow-lg">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           {/* Logo */}
@@ -118,8 +127,20 @@ const Navbar = memo(() => {
             <a href="/" className="text-lg font-bold text-white">NetBill Manager</a>
           </div>
 
-          {/* Navigation Links */}
-          <div className="flex space-x-4">
+          {/* Mobile Menu Button */}
+          <div className="flex items-center sm:hidden">
+            <button
+              onClick={toggleMobileMenu}
+              className="text-white hover:text-gray-200 focus:outline-none"
+            >
+              <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Navigation Links (Desktop) */}
+          <div className="hidden sm:flex space-x-4">
             <a
               href="/Home"
               className={`rounded-md px-3 py-2 text-sm font-medium ${
@@ -201,8 +222,8 @@ const Navbar = memo(() => {
             </a>
           </div>
 
-          {/* Authentication & Profile */}
-          <div className="flex items-center space-x-4">
+          {/* Authentication & Profile (Desktop) */}
+          <div className="hidden sm:flex items-center space-x-4">
             {!isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <a
@@ -262,6 +283,145 @@ const Navbar = memo(() => {
             )}
           </div>
         </div>
+
+        {/* Mobile Menu (Hidden by default) */}
+        {isMobileMenuOpen && (
+          <div className="mobile-menu sm:hidden bg-blue-600">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <a
+                href="/Home"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  isActive("/Home") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                }`}
+              >
+                Home
+              </a>
+              <a
+                href="/announcements"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  isActive("/announcements") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                }`}
+              >
+                Announcements
+              </a>
+              {isAuthenticated && userData.userType === "staff" ? (
+                <>
+                  <a
+                    href="/complains"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-3 py-2 rounded-md text-base font-medium ${
+                      isActive("/complains") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                    }`}
+                  >
+                    User Complains
+                  </a>
+                  <a
+                    href="/payments"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-3 py-2 rounded-md text-base font-medium ${
+                      isActive("/payments") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                    }`}
+                  >
+                    Collections
+                  </a>
+                </>
+              ) : isAuthenticated && userData.userType === "user" ? (
+                <>
+                  <a
+                    href="/complains"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-3 py-2 rounded-md text-base font-medium ${
+                      isActive("/complains") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                    }`}
+                  >
+                    My Complains
+                  </a>
+                  <a
+                    href="/payments"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-3 py-2 rounded-md text-base font-medium ${
+                      isActive("/payments") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                    }`}
+                  >
+                    Payments
+                  </a>
+                  <a
+                    href="/broadband"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-3 py-2 rounded-md text-base font-medium ${
+                      isActive("/broadband") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                    }`}
+                  >
+                    My Broadband
+                  </a>
+                </>
+              ) : null}
+              <a
+                href="/contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  isActive("/contact") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                }`}
+              >
+                Contact Us
+              </a>
+              <a
+                href="/tutorials"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  isActive("/tutorials") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                }`}
+              >
+                Tutorials
+              </a>
+              {!isAuthenticated ? (
+                <>
+                  <a
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-3 py-2 rounded-md text-base font-medium ${
+                      isActive("/login") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                    }`}
+                  >
+                    Login
+                  </a>
+                  <a
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-3 py-2 rounded-md text-base font-medium ${
+                      isActive("/register") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                    }`}
+                  >
+                    Register
+                  </a>
+                </>
+              ) : (
+                <>
+                  <a
+                    href="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-3 py-2 rounded-md text-base font-medium ${
+                      isActive("/profile") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                    }`}
+                  >
+                    Profile
+                  </a>
+                  <button
+                    onClick={() => {
+                      logoutUser();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-700 hover:text-gray-100"
+                  >
+                    Sign out
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

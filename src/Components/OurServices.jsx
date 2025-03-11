@@ -1,5 +1,6 @@
 import smartHome from "../assets/Smart_home.jpg";
 import industryImg from "../assets/Industry.jpg";
+
 const OurServices = () => {
   return (
     <section className="p-8 bg-white">
@@ -15,9 +16,9 @@ const OurServices = () => {
       </div>
 
       {/* Services Section with Two Images Side by Side */}
-      <div className="flex justify-between items-center gap-2">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-8">
         {/* Service 1 */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative w-full md:w-[48%]">
           <img
             src={smartHome}
             alt="Service 1"
@@ -30,7 +31,7 @@ const OurServices = () => {
         </div>
 
         {/* Service 2 */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative w-full md:w-[48%]">
           <img
             src={industryImg}
             alt="Service 2"

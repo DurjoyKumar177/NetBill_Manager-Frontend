@@ -54,11 +54,13 @@ const GradientSection = () => {
                   With blazing internet speed, enjoy the best graphics, 
                   realistic character & ultimate performance.
                 </p>
-                <button className="mt-3 bg-blue-600 text-white px-5 py-2 rounded-full font-semibold 
-                  transition-all duration-300 hover:bg-white hover:text-blue-600 border border-transparent 
-                  hover:border-blue-600">
-                  Test Now
-                </button>
+                <a href="https://www.speedtest.net/" target="_blank" rel="noopener noreferrer">
+                  <button className="mt-3 bg-blue-600 text-white px-5 py-2 rounded-full font-semibold 
+                    transition-all duration-300 hover:bg-white hover:text-blue-600 border border-transparent 
+                    hover:border-blue-600">
+                    Test Now
+                  </button>
+                </a>
               </div>
               <div>
                 <FaTrophy className="text-5xl transition-transform duration-300 hover:rotate-6" />

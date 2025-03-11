@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { toast, ToastContainer } from "react-toastify"; // Ensure ToastContainer is imported
+import { toast, ToastContainer } from "react-toastify"; 
 import axios from "axios";
-import { FaCheckCircle } from "react-icons/fa"; // Importing a success icon
+import { FaCheckCircle } from "react-icons/fa"; 
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
