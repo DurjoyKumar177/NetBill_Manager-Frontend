@@ -88,7 +88,7 @@ const Navbar = memo(() => {
 
   // Toggle mobile menu
   const toggleMobileMenu = () => {
-    setMobileMenuOpen(!isMobileMenuOpen);
+    setMobileMenuOpen((prev) => !prev); 
   };
 
   // Logout user
@@ -342,6 +342,15 @@ const Navbar = memo(() => {
                   >
                     Payments
                   </a>
+                  <a
+                     href="/broadband"
+                     onClick={() => setMobileMenuOpen(false)}
+                     className={`block px-3 py-2 rounded-md text-base font-medium ${
+                       isActive("/broadband") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
+                     }`}
+                   >
+                     My Broadband
+                   </a>
                 </>
               ) : null}
               <a
