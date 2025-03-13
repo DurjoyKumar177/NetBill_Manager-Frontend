@@ -194,14 +194,6 @@ const Navbar = memo(() => {
                 >
                   Payments
                 </a>
-                <a
-                  href="/broadband"
-                  className={`rounded-md px-3 py-2 text-sm font-medium ${
-                    isActive("/broadband") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
-                  }`}
-                >
-                  My Broadband
-                </a>
               </>
             ) : null}
             <a
@@ -274,7 +266,10 @@ const Navbar = memo(() => {
                     {userData.userType === "staff" ? (
                       <a href="/History" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Collections</a>
                     ) : (
-                      <a href="/History" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">History</a>
+                      <>
+                        <a href="/History" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">History</a>
+                        <a href="/broadband" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Broadband</a>
+                      </>
                     )}
                     <button onClick={logoutUser} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
                   </div>
@@ -346,15 +341,6 @@ const Navbar = memo(() => {
                     }`}
                   >
                     Payments
-                  </a>
-                  <a
-                    href="/broadband"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`block px-3 py-2 rounded-md text-base font-medium ${
-                      isActive("/broadband") ? "bg-blue-500 text-white" : "text-white hover:bg-blue-700 hover:text-gray-100"
-                    }`}
-                  >
-                    My Broadband
                   </a>
                 </>
               ) : null}

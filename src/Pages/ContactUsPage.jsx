@@ -1,6 +1,15 @@
 import React, { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import axios from "axios";
+import {
+  FaCheckCircle,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaEnvelope,
+  FaGlobe,
+} from "react-icons/fa";
 
-const ContactUsPage = () => {
+const ContactUs = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -8,194 +17,191 @@ const ContactUsPage = () => {
     subject: "",
     message: "",
   });
-  const [formErrors, setFormErrors] = useState({});
-  const [submissionStatus, setSubmissionStatus] = useState(null); 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const validateForm = () => {
-    let errors = {};
-    if (!formData.name) errors.name = "Name is required";
-    if (!formData.email) {
-      errors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = "Invalid email format";
-    }
-    if (!formData.phone) errors.phone = "Phone number is required";
-    if (!formData.subject) errors.subject = "Subject is required";
-    if (!formData.message) errors.message = "Message is required";
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    setFormErrors({ ...formErrors, [name]: "" });
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Custom success toast
+  const showSuccess = () =>
+    toast.success(
+      <div className="flex items-center">
+        <FaCheckCircle className="text-green-500 mr-2" />
+        <span>
+          <strong>Message Sent!</strong> Thank you for reaching out. We'll get
+          back to you as soon as possible. We're excited to hear from you!
+        </span>
+      </div>,
+      {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      }
+    );
 
-    if (!validateForm()) {
-      return;
-    }
+  // Custom error toast
+  const showError = (error) =>
+    toast.error(
+      <div className="flex items-center">
+        <FaCheckCircle className="text-red-500 mr-2" />
+        <span>{error}</span>
+      </div>,
+      {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      }
+    );
 
-    setIsSubmitting(true);
-    setSubmissionStatus(null); 
+  const handleContact = async (e) => {
+    e.preventDefault(); // Prevent page reload
+
     try {
-      const response = await fetch(
-        "https://net-bill-manager.vercel.app/api/contact/", 
+      const response = await axios.post(
+        "https://net-bill-manager.vercel.app/api/contact/",
+        formData,
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
         }
       );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response && response.status === 201) {
+        // Ensure response is received and status code is 201
+        showSuccess();
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
       }
-
-      const data = await response.json();
-      console.log("Success:", data);
-      setSubmissionStatus("success");
-      setFormData({ name: "", email: "", phone: "", subject: "", message: "" }); 
-      setFormErrors({}); 
-
     } catch (error) {
-      console.error("Error submitting form:", error);
-      setSubmissionStatus("error");
-    } finally {
-      setIsSubmitting(false);
+      // More detailed error handling
+      const errorMessage =
+        error?.response?.data?.message || "Something went wrong!";
+      showError(errorMessage);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-100 to-white p-6">
-      <div className="w-4/5 md:w-3/5 lg:w-2/5 bg-white/80 backdrop-blur-lg shadow-2xl rounded-2xl p-10 border border-gray-300 transition-all duration-300 hover:shadow-3xl">
+    <section className="p-10 ">
+      <div className="max-w-6xl mx-auto bg-white shadow-2xl rounded-xl p-10 grid grid-cols-1 md:grid-cols-2 gap-10">
+        {/* Left Side: Office Address & Contact Info */}
+        <div className="space-y-6">
+          <h2 className="text-4xl font-bold text-gray-800 mb-4">Contact Us</h2>
+          <p className="text-gray-600 text-lg">
+            Reach out to us for any inquiries or assistance.
+          </p>
 
-        {/* Display success message at the top */}
-        {submissionStatus === "success" && (
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-green-500 text-white py-3 px-6 rounded-md shadow-md text-lg font-semibold">
-            ✅ Message sent successfully! <br /> Thanks for contacting us. We will contact you as soon as possible.
-          </div>
-        )}
-
-        {/* Remove the success message after 3 seconds */}
-        {submissionStatus === "success" && setTimeout(() => setSubmissionStatus(null), 3000)}
-
-        {/* Title */}
-        <h2 className="text-3xl font-extrabold text-center text-indigo-700 mb-6">
-          Contact Us
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name Input */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-800">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${formErrors.name ? "border-red-500" : "border-gray-300"}`}
-            />
-            {formErrors.name && <p className="text-red-500 text-xs italic">{formErrors.name}</p>}
+          {/* Office Address Card */}
+          <div className="bg-gray-50 p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <FaMapMarkerAlt className="text-blue-600 mr-2" />
+              Office Address
+            </h2>
+            <p className="text-gray-600 mt-2">
+              🏢 Confidence Cable & Internet Ltd.
+            </p>
+            <p className="text-gray-600 mt-2 flex items-center">
+              <FaMapMarkerAlt className="text-gray-500 mr-2" />6 Gongapur Road,
+              Narayangonj, Bangladesh
+            </p>
           </div>
 
-          {/* Email Input */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-800">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${formErrors.email ? "border-red-500" : "border-gray-300"}`}
-            />
-            {formErrors.email && <p className="text-red-500 text-xs italic">{formErrors.email}</p>}
+          {/* Contact Info Card */}
+          <div className="bg-gray-50 p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <FaPhone className="text-blue-600 mr-2" />
+              Contact Information
+            </h3>
+            <p className="text-gray-600 mt-2 flex items-center">
+              📞 Phone: +01521738141
+            </p>
+            <p className="text-gray-600 mt-2 flex items-center">
+              📧 Email: confidencecable@company.com
+            </p>
+            <p className="text-gray-600 mt-2 flex items-center">
+              🌍 Website: www.dktechnology.com
+            </p>
           </div>
+        </div>
 
-          {/* Phone Input */}
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-800">
-              Phone Number
-            </label>
+        {/* Right Side: Contact Form */}
+        <div className="bg-white p-8 rounded-lg shadow-lg">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+            Send Us a Message
+          </h3>
+          <form className="space-y-4" onSubmit={handleContact}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Your Name"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Your Email"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              />
+            </div>
             <input
               type="tel"
-              id="phone"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              required
-              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${formErrors.phone ? "border-red-500" : "border-gray-300"}`}
+              placeholder="Your Number"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             />
-            {formErrors.phone && <p className="text-red-500 text-xs italic">{formErrors.phone}</p>}
-          </div>
-
-          {/* Subject Input */}
-          <div>
-            <label htmlFor="subject" className="block text-sm font-medium text-gray-800">
-              Subject
-            </label>
             <input
               type="text"
-              id="subject"
               name="subject"
               value={formData.subject}
               onChange={handleChange}
-              required
-              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${formErrors.subject ? "border-red-500" : "border-gray-300"}`}
+              placeholder="Choose Subject"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             />
-            {formErrors.subject && <p className="text-red-500 text-xs italic">{formErrors.subject}</p>}
-          </div>
-
-          {/* Message Input */}
-          <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-800">
-              Message
-            </label>
             <textarea
-              id="message"
               name="message"
               value={formData.message}
               onChange={handleChange}
-              required
+              placeholder="Enter Your Message"
               rows="4"
-              className={`mt-2 block w-full p-3 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ${formErrors.message ? "border-red-500" : "border-gray-300"}`}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             ></textarea>
-            {formErrors.message && <p className="text-red-500 text-xs italic">{formErrors.message}</p>}
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-white hover:text-indigo-600 hover:border-indigo-600 border-2 shadow-md"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Sending..." : "Send Message"}
-          </button>
-        </form>
-
-        {/* Submission Messages */}
-        {submissionStatus === "error" && (
-          <div className="mt-4 text-red-500 text-center font-medium">
-            ❌ An error occurred while sending the message. Please try again.
-          </div>
-        )}
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition duration-300"
+            >
+              Submit
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+      <ToastContainer /> {/* Make sure ToastContainer is included here */}
+    </section>
   );
 };
 
-export default ContactUsPage;
+export default ContactUs;

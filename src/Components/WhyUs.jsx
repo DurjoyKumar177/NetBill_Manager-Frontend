@@ -11,7 +11,7 @@ const WhyUs = () => {
   ];
 
   return (
-    <section className="p-8 bg-gray-100 text-center">
+    <section className="p-8 px-16 text-center">
       {/* Title & Description */}
       <h2 className="text-3xl font-bold text-gray-800 mb-4">Why Us</h2>
       <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">

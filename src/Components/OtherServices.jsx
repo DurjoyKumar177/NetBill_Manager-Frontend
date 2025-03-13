@@ -111,7 +111,7 @@ const OtherServices = () => {
   };
 
   return (
-    <div className="bg-gray-100 py-16 px-6">
+    <div className="bg-gray-100 py-8 px-16">
       {/* Header */}
       <div className="text-center mb-10">
         <h4 className="text-sm text-primary uppercase tracking-wide">Other Services</h4>
@@ -151,7 +151,7 @@ const OtherServices = () => {
 
             {/* More Button */}
             <button
-              className="mt-4 px-5 py-2 bg-primary text-white font-medium rounded-lg hover:bg-blue-600 transition"
+              className="mt-4 px-5 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-800 transition"
               onClick={() => toggleExpand(service.id)}
             >
               {expandedCard === service.id ? "Less" : "More"}
