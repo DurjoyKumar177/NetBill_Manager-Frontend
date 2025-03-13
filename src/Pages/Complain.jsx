@@ -10,6 +10,7 @@ const Complaints = () => {
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [expandedReplies, setExpandedReplies] = useState({});
   const [loading, setLoading] = useState(true); // loading
+  const [userNames, setUserNames] = useState({}); // Store user names
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
@@ -24,6 +25,18 @@ const Complaints = () => {
       .then(res => {
         setComplaints(res.data.reverse());
         setLoading(false); // Set loading to false after fetching complaints
+
+        // Fetch user names for each complaint
+        res.data.forEach(complain => {
+          axios.get(`https://net-bill-manager.vercel.app/api/accounts/profile/${complain.user}/`, { headers })
+            .then(res => {
+              setUserNames(prev => ({ ...prev, [complain.user]: res.data.name || "Unknown User" }));
+            })
+            .catch(err => {
+              console.error("Error fetching user name", err);
+              setUserNames(prev => ({ ...prev, [complain.user]: "Unknown User" }));
+            });
+        });
       })
       .catch(err => {
         console.error("Error fetching complaints", err);
@@ -71,7 +84,10 @@ const Complaints = () => {
             </div>
           )}
         </div>
-        <h2 className="text-2xl font-bold mb-4 text-blue-600">My Complaints</h2>
+        {/* Update heading based on user type */}
+        <h2 className="text-2xl font-bold mb-4 text-blue-600">
+          {userType === "staff" ? "User Complaints" : "My Complaints"}
+        </h2>
         {loading ? ( // Show loader while loading
           <div className="flex justify-center items-center">
             <span className="loading loading-spinner loading-lg text-blue-600"></span>
@@ -84,17 +100,21 @@ const Complaints = () => {
               key={complain.id} 
               className="border border-gray-300 p-4 rounded bg-white shadow-lg hover:shadow-xl transition-shadow mb-4"
             >
-              <div className="flex">
-                <div className="w-1/2">
-                  <h3 className="text-xl font-semibold text-gray-800">{complain.title}</h3>
-                  <p className="text-gray-600 mb-2">{complain.body}</p>
-                </div>
+              
+              <div className="text-sm text-gray-500 mb-2">
+                Created at: {new Date(complain.created_at).toLocaleDateString()} {/* Show only date */}
               </div>
+
+              {/* Complaint title and body */}
+              <h3 className="text-xl font-semibold text-gray-800">{complain.title}</h3>
+              <p className="text-gray-600 mb-2 whitespace-pre-line">{complain.body}</p>
+
+              {/* Attachments - Conditionally render images */}
               {complain.attachments.length > 0 && (
-                <div className="mt-2 flex justify-center">
-                  {complain.attachments.map((attachment) => (
+                <div className={`grid ${complain.attachments.length === 1 ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"} gap-2 mt-2`}>
+                  {complain.attachments.slice(0, 2).map((attachment) => (
                     attachment.file.endsWith(".mp4") ? (
-                      <video key={attachment.id} className="w-full max-w-3xl rounded" controls>
+                      <video key={attachment.id} className="w-full rounded" controls>
                         <source src={attachment.file} type="video/mp4" />
                         Your browser does not support the video tag.
                       </video>
@@ -103,13 +123,15 @@ const Complaints = () => {
                         key={attachment.id} 
                         src={attachment.file} 
                         alt="attachment" 
-                        className="w-full max-w-3xl h-80 rounded object-cover cursor-pointer" 
+                        className="w-full h-40 md:h-48 rounded object-cover cursor-pointer" 
                         onClick={() => window.open(attachment.file, "_blank")}
                       />
                     )
                   ))}
                 </div>
               )}
+
+              {/* Buttons for replies */}
               <div className="flex justify-center mt-2">
                 <button 
                   className="btn btn-outline btn-sm text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white transition" 
@@ -126,6 +148,8 @@ const Complaints = () => {
                   </button>
                 )}
               </div>
+
+              {/* Reply input */}
               {selectedComplaint === complain.id && (
                 <div className="mt-4">
                   <textarea
@@ -142,6 +166,8 @@ const Complaints = () => {
                   </button>
                 </div>
               )}
+
+              {/* Replies section */}
               {expandedReplies[complain.id] && replies[complain.id] && (
                 <div className="mt-2 border-t pt-2">
                   {replies[complain.id].length === 0 ? (
@@ -149,7 +175,7 @@ const Complaints = () => {
                   ) : (
                     replies[complain.id].map(reply => (
                       <div key={reply.id} className="border p-2 rounded mt-2 bg-gray-100">
-                        <p className="text-gray-700">{reply.message}</p>
+                        <p className="text-gray-700 whitespace-pre-line">{reply.message}</p>
                         <span className="text-sm text-gray-500">{new Date(reply.created_at).toLocaleString()}</span>
                       </div>
                     ))

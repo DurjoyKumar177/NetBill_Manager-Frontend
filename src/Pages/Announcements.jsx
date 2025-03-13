@@ -44,8 +44,7 @@ const Announcements = () => {
 
         // Fetch announcements
         const announcementsResponse = await fetch(
-          "https://net-bill-manager.vercel.app/api/announcements/",
-          
+          "https://net-bill-manager.vercel.app/api/announcements/"
         );
         const announcementsData = await announcementsResponse.json();
 
@@ -151,7 +150,10 @@ const Announcements = () => {
           </div>
 
           <h2 className="text-lg font-semibold mb-1">{post?.title || "Untitled"}</h2>
-          <p className="text-gray-700">{post?.text || "No description available."}</p>
+          {/* Use white-space: pre-line to preserve line breaks */}
+          <p className="text-gray-700 whitespace-pre-line">
+            {post?.text || "No description available."}
+          </p>
 
           {post.media && post.media.length > 0 && (
             <div className={`grid ${getGridClass(post.media.length)} gap-2 mt-3`}>
