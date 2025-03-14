@@ -2,7 +2,7 @@ import { FaGamepad, FaTrophy, FaWifi } from "react-icons/fa";
 
 const GradientSection = () => {
   return (
-    <section className="p-8 px-16">
+    <section className="p-8 px-2md:px-16">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         
         {/* Left Section - Paragraph */}

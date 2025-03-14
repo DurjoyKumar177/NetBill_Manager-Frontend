@@ -12,7 +12,7 @@ const OurProducts = () => {
   ];
 
   return (
-    <div className="p-5 bg-gray-100 px-8">
+    <div className="p-5 bg-gray-100 px-6 md:px-8">
       {/* Header Section */}
       <div className="text-center mb-10">
         <h4 className="text-sm text-blue-600 uppercase tracking-wide font-medium">

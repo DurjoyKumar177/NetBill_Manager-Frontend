@@ -16,7 +16,7 @@ const PackagePlans = () => {
   };
 
   return (
-    <div className="bg-base-200 p-6 px-12">
+    <div className="bg-base-200 p-6 px-2 md:px-12">
       <h4 className="text-sm text-primary text-center m-5">Package Plans</h4>
       <h2 className="text-3xl max-w-96 mx-auto text-center font-semibold">
         Our package offers <span className="text-primary">exceptional</span> performance

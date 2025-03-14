@@ -2,7 +2,7 @@ import { FaPlayCircle } from "react-icons/fa";
 
 const AboutUs = () => {
   return (
-    <section className=" px-16">
+    <section className=" px-6 md:px-16">
       {/* About Us Subtitle */}
       <h4 className="text-sm text-primary m-5 font-semibold tracking-wider">
         ABOUT US

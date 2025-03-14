@@ -111,7 +111,7 @@ const OtherServices = () => {
   };
 
   return (
-    <div className="bg-gray-100 py-8 px-16">
+    <div className="bg-gray-100 py-8 px-8 md:px-16">
       {/* Header */}
       <div className="text-center mb-10">
         <h4 className="text-sm text-primary uppercase tracking-wide">Other Services</h4>

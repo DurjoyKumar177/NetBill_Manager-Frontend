@@ -3,7 +3,7 @@ import industryImg from "../assets/Industry.jpg";
 
 const OurServices = () => {
   return (
-    <section className="px-16 py-8">
+    <section className="md:px-16 px-6 py-8">
       {/* Our Services Subtitle */}
       <div className="mb-8 text-center">
         <h2 className="text-sm font-semibold text-primary">Our Services</h2>
